@@ -1,0 +1,39 @@
+# OS / Editor
+.DS_Store
+.vscode/
+*.code-workspace
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Secrets
+.env
+*.json
+
+# Ignore Datasets
+data/
+
+# Ignore notebooks
+notebooks/
+
+# Ignore test
+test/
+pytest_cache/
+pytest.ini
+.pytest_cache/
+
+# Ignore csv files
+*.csv
+*.xlsx
+*.parquet
+
+# Keep placeholders inside ignored dirs
+!apps/etl-dev/**/.gitkeep
+
+# Ignore logs
+logs/
