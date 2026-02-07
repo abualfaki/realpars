@@ -37,3 +37,6 @@ pytest.ini
 
 # Ignore logs
 logs/
+
+# Tokens
+ airbytetoken_2026_02_05.txt
