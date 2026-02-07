@@ -1,0 +1,31 @@
+airbyte
+
+
+# Data Manipulation
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Web framework for Google Cloud Functions
+functions-framework==3.10.0 # latest version as of 2024-09-03
+
+# Loadning Environment variables
+python-dotenv>=1.0.0
+
+#### Google services ####
+
+# Authentication
+google-auth>=2.20.0 # Allows machines to authenticate to Google APIs using OAuth 2.0
+google-auth-oauthlib>=1.0.0 # (User to Google Authenticate) Allows users to authenticate to Google APIs using OAuth 2.0
+google-auth-httplib2>=0.1.0
+
+# Google Cloud Storage
+google-cloud-storage>=2.10.0 
+google-cloud-logging>=3.5.0  # Added for Google Cloud logging support
+
+# Google BigQuery
+google-cloud-bigquery>=3.11.0
+
+# Google API Client
+google-api-python-client>=2.90.0
+google-auth-httplib2>=0.1.0
+
