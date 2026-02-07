@@ -21,6 +21,9 @@ data/
 # Ignore notebooks
 notebooks/
 
+# Ignore secrets
+secrets/
+
 # Ignore test
 test/
 pytest_cache/
@@ -33,7 +36,6 @@ pytest.ini
 
 *.parquet
 *.json
-
 
 # Ignore logs
 logs/
