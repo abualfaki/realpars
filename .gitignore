@@ -30,10 +30,10 @@ pytest.ini
 # Ignore csv files
 *.csv
 *.xlsx
-*.parquet
 
-# Keep placeholders inside ignored dirs
-!apps/etl-dev/**/.gitkeep
+*.parquet
+*.json
+
 
 # Ignore logs
 logs/
