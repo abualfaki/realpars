@@ -42,3 +42,6 @@ logs/
 
 # Tokens
  airbytetoken_2026_02_05.txt
+
+# bigquery credentials
+ profiles.yml
