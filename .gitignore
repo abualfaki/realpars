@@ -45,3 +45,9 @@ logs/
 
 # bigquery credentials
  profiles.yml
+ .user.yml
+
+# dbt
+target/
+dbt_packages/
+dbt_internal_packages/
