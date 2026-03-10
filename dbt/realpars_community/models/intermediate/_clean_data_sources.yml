@@ -1,0 +1,29 @@
+version: 2
+
+sources:
+  - name: cc_stg_clean
+    description: "Cleaned staging data from raw Circle Community data via dbt transformations"
+    database: "{{ env_var('PROJECT_ID') }}"
+    schema: "cc_stg_clean"
+
+    tables:
+      - name: clean_communtity_members_table
+        description: "Cleaned community members profile data with tags and metadata"
+
+      - name: clean_course_lesson_completed_table
+        description: "Cleaned course lesson completion events (includes all lesson attempts)"
+
+      - name: clean_courses_completed_table
+        description: "Cleaned course completion events (deduplicated to earliest per member per course)"
+
+      - name: clean_events_attendees_table
+        description: "Cleaned event attendance and RSVP data"
+
+      - name: clean_post_comment_liked_table
+        description: "Cleaned comment like events tracking who liked whose comments"
+
+      - name: clean_post_comments_table
+        description: "Cleaned post comment creation events"
+
+      - name: clean_post_liked_table
+        description: "Cleaned post like events tracking who liked whose posts"

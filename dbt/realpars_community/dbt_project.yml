@@ -1,0 +1,41 @@
+name: 'realpars'
+version: '1.0'
+config-version: 2
+
+profile: 'realpars'
+
+# File path configurations
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+# Directories to clean when running `dbt clean`
+clean-targets:
+    - "target"
+    - "dbt_packages"
+
+# Model configurations
+models:
+  realpars:
+
+    staging:
+      +materialized: view
+      +schema: cc_stg_clean #cc stands for Circle Community
+      +tags: ['staging']
+
+    intermediate:
+      +materialized: incremental
+      +schema: cc_intermediate_transformations
+      +tags: ['intermediate']
+
+    marts:
+      +materialized: table
+      +tags: ['marts']
+
+      weekly_reports:
+        +schema: cc_stg_weekly_reports
+        +tags: ['marts','weekly_reports']
+
+      business_members_relationships:
+        +schema: cc_business_members_relationships
+        +tags: ['marts','business_relationships']

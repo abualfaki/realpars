@@ -1,0 +1,271 @@
+version: 2
+
+models:
+  - name: manager_email_report_with_rankings
+    description: |
+      Comprehensive weekly manager report with engagement rankings, week-over-week comparison, 
+      and automated action items. Designed for Make.com automation to generate personalized 
+      manager emails.
+      
+      **Dataset:** cc_make_com_weekly_reports
+      
+      **Point System:**
+      - Live classes attended: 5 points each
+      - Lessons completed: 1 point each
+      - Likes received: 1 point each
+      - Comments received: 1 point each
+      - Comments made: 1 point each
+      
+      **Update Frequency:** Weekly (typically refreshed Monday mornings for previous week)
+      
+    columns:
+      # Manager Information
+      - name: manager_email
+        description: Manager's email address (primary identifier for automation)
+        tests:
+          - not_null
+          
+      - name: manager_full_name
+        description: Manager's full name for personalization
+        
+      - name: manager_first_name
+        description: Manager's first name
+        
+      - name: manager_last_name
+        description: Manager's last name
+        
+      - name: business_name
+        description: Company/business name
+      
+      # Week Information
+      - name: week_start_date
+        description: Start date of the reporting week (Monday)
+        tests:
+          - not_null
+          
+      - name: week_end_date
+        description: End date of the reporting week (Sunday)
+        
+      - name: week_start_formatted
+        description: Human-readable week start date (e.g., "January 15, 2026")
+        
+      - name: week_end_formatted
+        description: Human-readable week end date
+      
+      # Team Member Information
+      - name: member_community_id
+        description: Unique identifier for the team member
+        tests:
+          - not_null
+          
+      - name: member_email
+        description: Team member's email address
+        
+      - name: member_first_name
+        description: Team member's first name
+        
+      - name: member_last_name
+        description: Team member's last name
+        
+      - name: member_full_name
+        description: Team member's full name (for display in reports)
+      
+      # Engagement Metrics (Raw Counts)
+      - name: classes_attended
+        description: Number of live classes attended this week
+        
+      - name: lessons_completed
+        description: Number of lessons completed this week
+        
+      - name: likes_received
+        description: Number of likes received on posts/comments
+        
+      - name: comments_received
+        description: Number of comments received on member's posts
+        
+      - name: comments_made
+        description: Number of comments made by the member
+      
+      # Points Breakdown
+      - name: points_from_classes
+        description: Points earned from live classes (classes * 5)
+        
+      - name: points_from_lessons
+        description: Points earned from lessons (lessons * 1)
+        
+      - name: points_from_likes_received
+        description: Points earned from likes received
+        
+      - name: points_from_comments_received
+        description: Points earned from comments received
+        
+      - name: points_from_comments_made
+        description: Points earned from making comments
+        
+      - name: total_points
+        description: Total engagement points for the week
+        tests:
+          - not_null
+      
+      # Week-over-Week Comparison
+      - name: previous_week_points
+        description: Total points from the previous week
+        
+      - name: points_change
+        description: Change in points from previous week (positive = improvement)
+      
+      # Rankings & Categories
+      - name: performance_rank
+        description: |
+          Rank within the team based on total points (1 = highest scorer)
+          Use this to identify top performers
+        
+      - name: mover_rank
+        description: |
+          Rank based on points improvement from previous week (1 = biggest gainer)
+          Use this to identify top movers
+        
+      - name: performance_category
+        description: |
+          Performance category: top_performer, high_performer, average_performer, 
+          low_performer, no_activity
+        
+      - name: momentum_category
+        description: |
+          Momentum category: top_mover, improving, stable, declining, new_member
+        
+      - name: suggested_action
+        description: |
+          AI-generated suggested action item for the manager to take with this team member.
+          Pre-formatted with emoji for use in emails.
+      
+      # Boolean Flags (for easy Make.com filtering)
+      - name: is_top_performer
+        description: TRUE if member is in top 3 performers (performance_rank <= 3)
+        
+      - name: is_top_mover
+        description: TRUE if member is in top 3 movers with positive change
+        
+      - name: needs_reengagement
+        description: TRUE if member had zero activity this week
+      
+      # Team Summary Stats (denormalized)
+      - name: team_size
+        description: Total number of team members
+        
+      - name: active_members
+        description: Number of team members with any activity this week
+        
+      - name: inactive_members
+        description: Number of team members with zero activity
+        
+      - name: team_total_points
+        description: Sum of all team member points
+        
+      - name: team_avg_points
+        description: Average points per team member
+        
+      - name: team_max_points
+        description: Highest individual score on the team
+        
+      - name: team_points_change
+        description: Total team points change from previous week
+        
+      - name: team_avg_points_change
+        description: Average points change per team member
+        
+      - name: team_classes_attended
+        description: Total live classes attended by entire team
+        
+      - name: team_lessons_completed
+        description: Total lessons completed by entire team
+        
+      - name: team_likes_received
+        description: Total likes received by entire team
+        
+      - name: team_comments_received
+        description: Total comments received by entire team
+        
+      - name: team_comments_made
+        description: Total comments made by entire team
+      
+      # Metadata
+      - name: report_generated_at
+        description: Timestamp when this report was generated
+
+  - name: weekly_team_engagement_report
+    description: |
+      Base weekly engagement data combining member activity with business relationships.
+      Source table for manager reports.
+    
+  - name: manager_weekly_report_aggregated
+    description: |
+      Legacy aggregated manager report using array of team members.
+      Use manager_email_report_with_rankings for new integrations.
+
+  - name: manager_weekly_team_detail_report
+    description: |
+      Complete weekly team detail report for PDF export to business managers.
+      
+      **Dataset:** cc_make_com_weekly_reports
+      
+      **Purpose:** Generate comprehensive PDF reports showing each team member's 
+      raw activity counts (no points calculation) with week-over-week comparison.
+      
+      **Metrics (Raw Counts):**
+      - Live classes attended
+      - Lessons completed
+      - Likes received
+      - Comments received
+      - Comments made
+      - Total engagement (sum of all activities)
+      - Previous week comparison for all metrics
+      
+      **Use Case:** PDF report generation in Make.com automation
+      **Update Frequency:** Weekly (typically refreshed Monday mornings)
+      
+    columns:
+      - name: manager_email
+        description: Manager's email address
+        
+      - name: business_name
+        description: Company/business name
+        
+      - name: team_member
+        description: Team member's full name (formatted for display)
+        
+      - name: live_classes_attended
+        description: Number of live classes attended this week
+        
+      - name: lessons_completed
+        description: Number of lessons completed this week
+        
+      - name: likes_received
+        description: Number of likes received this week
+        
+      - name: comments_received
+        description: Number of comments received this week
+        
+      - name: comments_made
+        description: Number of comments made this week
+        
+      - name: week_total_engagement
+        description: Sum of all activities this week (no weighting)
+        
+      - name: previous_week_engagement
+        description: Total engagement from previous week
+        
+      - name: total_engagement_change
+        description: Change in total engagement from previous week
+        
+      - name: activity_status
+        description: Active or Inactive status for the current week
+        
+      - name: total_team_members
+        description: Total team size (denormalized from team summary)
+        
+      - name: active_members
+        description: Number of members with any activity this week
+        
+      - name: team_total_engagement
+        description: Sum of all team engagement this week

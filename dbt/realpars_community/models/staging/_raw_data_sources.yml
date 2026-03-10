@@ -1,0 +1,41 @@
+version: 2
+
+sources:
+  - name: raw_cc_data #(raw Circle Community data)
+    description: "Raw data from Airbyte to Circle Community API"
+    database: "{{ env_var('PROJECT_ID') }}"
+    schema: "{{ env_var('BQ_RAW_DATASET') }}"
+
+    tables:
+      - name: comments
+        description: "Raw comments data made by circle community members"
+
+      - name: community_members
+        description: "All mcommunity members in the RealPars Circle Community"
+
+      - name: courses_completed
+        description: "List of completed courses by members in the RealPars Circle Community"
+
+      - name: course_lesson_completed
+        description: "List of completed course lessons by members in Circle Community"
+
+      - name: event_attendees
+        description: "List of event attendees in the RealPars Circle Community"
+
+      - name: events_list
+        description: "List of events in the RealPars Circle Community"
+
+      - name: member_tags_list
+        description: "List of all member tags in the RealPars Circle Community"
+
+      - name: posts
+        description: "List of all posts made by circle community members"
+
+      - name: post_comment_created
+        description: "List of all comments made on posts by circle community members"
+
+      - name: post_comment_liked
+        description: "List of all comments liked on posts by circle community members"
+
+      - name: post_liked
+        description: "List of all posts liked by circle community members"
