@@ -1,9 +1,17 @@
 from __future__ import annotations
 from dotenv import load_dotenv
-load_dotenv(override=True) #Load Latest .env varibles
+from pathlib import Path
 
 import os
 import logging
+
+# Load .env from project root
+project_root = Path(__file__).parent.parent
+env_path = project_root / ".env"
+
+print(f"Loading environment from: {env_path}")
+load_dotenv(env_path, override=True) #Load Latest .env varibles
+
 logging.basicConfig(level=logging.INFO, format='%(message)s\n\n')
 logger = logging.getLogger("config")
 logger.setLevel(logging.INFO)
@@ -64,16 +72,43 @@ except Exception as e:
     raise e
 
 
+# Google Application Credentials (Service Account Key)
+try:
+    GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    
+    if GOOGLE_APPLICATION_CREDENTIALS is None:
+        logger.warning("⚠️ Environment variable GOOGLE_APPLICATION_CREDENTIALS not set. Make sure to set it in the .env file or github secrets")
+    else:
+        # Convert relative path to absolute path if needed
+        if not GOOGLE_APPLICATION_CREDENTIALS.startswith('/'):
+            GOOGLE_APPLICATION_CREDENTIALS = str(project_root / GOOGLE_APPLICATION_CREDENTIALS)
+            logger.info(f"✅ Converted credentials path to absolute: {GOOGLE_APPLICATION_CREDENTIALS}")
+        
+        # Verify the file exists
+        if not os.path.exists(GOOGLE_APPLICATION_CREDENTIALS):
+            logger.error(f"❌ Google credentials file not found at: {GOOGLE_APPLICATION_CREDENTIALS}")
+        else:
+            # Set it as actual environment variable so BigQuery client can find it
+            os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = GOOGLE_APPLICATION_CREDENTIALS
+            logger.info(f"✅ Google credentials file found and set: {GOOGLE_APPLICATION_CREDENTIALS}")
+            
+except Exception as e:
+    logger.error(f"❌ Error setting GOOGLE_APPLICATION_CREDENTIALS: {e}")
+    raise e
+
+
 # Circle.so API Keys
 try:
+    CIRCLE_DATA_API_TOKEN = os.getenv("CIRCLE_DATA_API_TOKEN")
     CIRCLE_CI_ADMIN_V2_KEY = os.getenv("CIRCLE_CI_ADMIN_V2_KEY")
     CIRCLE_CI_ADMIN_V1_KEY = os.getenv("CIRCLE_CI_ADMIN_V1_KEY")
     
-    if CIRCLE_CI_ADMIN_V2_KEY is None or CIRCLE_CI_ADMIN_V1_KEY is None:
-        logger.warning("⚠️ One or both Circle.so API keys are not set. Make sure to set them in the .env file or github secrets")
+    if CIRCLE_CI_ADMIN_V2_KEY is None or CIRCLE_CI_ADMIN_V1_KEY is None or CIRCLE_DATA_API_TOKEN is None:
+        logger.warning("⚠️ One or more Circle.so API keys are not set. Make sure to set them in the .env file or github secrets")
 except Exception as e:
     logger.error(f"❌ Error setting Circle.so API keys: {e}")
     raise e
+
 
 # Fully Parsed Circle.so API endpoints
 CIRCLE_COMMUNITY_MEMBERS_ENDPOINT = _url_parse(os.getenv("CIRCLE_API_BASE_URL", ""), os.getenv("CIRCLE_ADMIN_V2_COMMUNITY_MEMBERS_ENDPOINT", ""))
@@ -86,4 +121,123 @@ try:
         logger.warning("⚠️ Environment variable BIGQUERY_API_KEY not set. Make sure to set it in the .env file or github secrets")
 except Exception as e:
     logger.error(f"❌ Error setting BIGQUERY_API_KEY: {e}")
+    raise e
+
+
+# BigQuery(BQ) Dataset and Table Names
+try:
+    BQ_RAW_DATASET = os.getenv("BQ_RAW_DATASET")
+    BQ_STG_CLEAN_DATASET = os.getenv("BQ_STG_CLEAN_DATASET")
+    BQ_STG_BUSINESS_RELATIONSHIPS_DATASET = os.getenv("BQ_STG_BUSINESS_RELATIONSHIPS_DATASET")
+    BQ_STG_WEEKLY_REPORTS_DATASET = os.getenv("BQ_STG_WEEKLY_REPORTS_DATASET")
+    BQ_STG_TRANSFORMED_DATASET = os.getenv("BQ_STG_TRANSFORMED_DATASET")
+    
+    # Legacy individual table name variables (for backward compatibility)
+    RAW_COMMUNITY_MEMBERS_TABLE = os.getenv("RAW_COMMUNITY_MEMBERS_TABLE")
+    RAW_COMMUNITY_MEMBERS_HISTORY_TABLE = os.getenv("RAW_COMMUNITY_MEMBERS_HISTORY_TABLE")
+    RAW_COURSE_COMPLETED_TABLE = os.getenv("RAW_COURSE_COMPLETED_TABLE")
+    RAW_MEMBER_TAGS_TABLE = os.getenv("RAW_MEMBER_TAGS_TABLE")
+    RAW_COMMENTS_TABLE = os.getenv("RAW_COMMENTS_TABLE")
+    RAW_POSTS_TABLE = os.getenv("RAW_POSTS_TABLE")
+    RAW_EVENTS_ATTENDEES_TABLE = os.getenv("RAW_EVENTS_ATTENDEES_TABLE")
+    RAW_EVENTS_LIST_TABLE = os.getenv("RAW_EVENTS_LIST_TABLE")
+
+    # Clean Staging Table Names
+    STG_CLEAN_COMMUNITY_MEMBERS_TABLE = os.getenv("STG_CLEAN_COMMUNITY_MEMBERS_TABLE")
+    STG_CLEAN_COMMENTS_TABLE = os.getenv("STG_CLEAN_COMMENTS_TABLE")
+    STG_CLEAN_COURSE_COMPLETED_TABLE = os.getenv("STG_CLEAN_COURSE_COMPLETED_TABLE")
+    STG_CLEAN_POSTS_TABLE = os.getenv("STG_CLEAN_POSTS_TABLE")
+    STG_CLEAN_MEMBER_TAGS_TABLE = os.getenv("STG_CLEAN_MEMBER_TAGS_TABLE")
+    STG_CLEAN_EVENTS_ATTENDEES_TABLE = os.getenv("STG_CLEAN_EVENTS_ATTENDEES_TABLE")
+    STG_CLEAN_EVENTS_LIST_TABLE = os.getenv("STG_CLEAN_EVENTS_LIST_TABLE")
+    STG_CLEAN_COURSE_COMPLETED_TABLE = os.getenv("STG_CLEAN_COURSE_COMPLETED_TABLE")
+
+    # Business Relationships Table
+    BQ_STG_BUSINESS_LIST_TABLE=os.getenv("BQ_STG_BUSINESS_LIST_TABLE")
+    BQ_STG_BUSINESS_RELATIONSHIPS_TABLE=os.getenv("BQ_STG_BUSINESS_RELATIONSHIPS_TABLE")
+
+
+    # BQ_STG_WEEKLY_REPORTS_DATASET Table Names
+    STG_WEEKLY_REPORTS_COURSE_COMPLETION_TABLE = os.getenv("STG_WEEKLY_REPORTS_COURSE_COMPLETION_TABLE")
+
+    # Transformed Table Names
+    STG_TRANSFORMED_COURSE_COMPLETED_TABLE = os.getenv("STG_TRANSFORMED_COURSE_COMPLETED_TABLE")
+
+    # Log warnings for missing tables
+    if BQ_RAW_DATASET is None:
+        logger.warning("⚠️ BIGQUERY_RAW_DATASET not set. Make sure to set it in the .env file")
+    if BQ_STG_CLEAN_DATASET is None:
+        logger.warning("⚠️ BIGQUERY_STG_CLEAN_DATASET not set. Make sure to set it in the .env file")
+    if BQ_STG_TRANSFORMED_DATASET is None:
+        logger.warning("⚠️ BIGQUERY_STG_TRANSFORMED_DATASET not set. Make sure to set it in the .env file")
+    if BQ_STG_BUSINESS_RELATIONSHIPS_DATASET is None:
+        logger.warning("⚠️ BIGQUERY_STG_BUSINESS_RELATIONSHIPS_DATASET not set. Make sure to set it in the .env file")
+        
+except Exception as e:
+    logger.error(f"❌ Error setting BigQuery dataset or table names: {e}")
+    raise e
+
+
+# Airbyte Configuration
+try:
+    # OAuth2 Credentials (RECOMMENDED - more secure)
+    AIRBYTE_CLIENT_ID = os.getenv("AIRBYTE_CLIENT_ID")
+    AIRBYTE_CLIENT_SECRET = os.getenv("AIRBYTE_CLIENT_SECRET")
+    
+    # Legacy Bearer Token (still supported)
+    AIRBYTE_API_TOKEN = os.getenv("AIRBYTE_API_TOKEN")
+    AIRBYTE_WORKSPACE_ID = os.getenv("AIRBYTE_WORKSPACE_ID")
+    
+    # Path to token file as fallback
+    AIRBYTE_TOKEN_FILE = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), 
+        "secrets", 
+        "airbytetoken_2026_02_19.txt"
+    )
+    
+    # Load token from file if environment variable not set
+    if AIRBYTE_API_TOKEN is None and os.path.exists(AIRBYTE_TOKEN_FILE):
+        with open(AIRBYTE_TOKEN_FILE, 'r') as f:
+            AIRBYTE_API_TOKEN = f.read().strip()
+        logger.info("✅ Loaded Airbyte token from file")
+    
+    # Determine authentication method (matches priority in airbyte_factory.py)
+    if AIRBYTE_API_TOKEN:
+        logger.info("✅ Using Bearer token authentication")
+    elif AIRBYTE_CLIENT_ID and AIRBYTE_CLIENT_SECRET:
+        logger.info("✅ Using OAuth2 authentication (Client ID/Secret)")
+    else:
+        logger.warning("⚠️ No Airbyte authentication configured. Set either:")
+        logger.warning("   - AIRBYTE_API_TOKEN (from Airbyte Cloud)")
+        logger.warning("   - AIRBYTE_CLIENT_ID and AIRBYTE_CLIENT_SECRET")
+    
+    # Multiple Airbyte Connection IDs (one per data source/table)
+    AIRBYTE_CONNECTION_IDS = {
+        "community_members": os.getenv("AIRBYTE_CONNECTION_ID_COMMUNITY_MEMBERS_TABLES"),
+        "comments": os.getenv("AIRBYTE_CONNECTION_ID_COMMENTS_TABLE"),
+        "events": os.getenv("AIRBYTE_CONNECTION_ID_EVENTS_LIST_&_ATTENDEES_TABLES"),
+        "member_tags": os.getenv("AIRBYTE_CONNECTION_ID_MEMEBER_TAGS_TABLE"),
+        "posts": os.getenv("AIRBYTE_CONNECTION_ID_POSTS_TABLE"),
+    }
+    
+    # Log any missing connection IDs
+    missing_connections = [key for key, value in AIRBYTE_CONNECTION_IDS.items() if value is None]
+    if missing_connections:
+        logger.warning(f"⚠️ Missing Airbyte connection IDs for: {', '.join(missing_connections)}")
+    
+    # Legacy single connection ID (for backward compatibility)
+    AIRBYTE_CONNECTION_ID = os.getenv("AIRBYTE_CONNECTION_ID") or AIRBYTE_CONNECTION_IDS.get("community_members")
+    
+    # Mapping between connection names and their corresponding BigQuery table names
+    # This makes it easy to know which table is populated by which Airbyte connection
+    CONNECTION_TO_TABLE_MAP = {
+        "community_members": ["community_members", "community_members_history"],
+        "comments": ["comments"],
+        "events": ["events_list", "events_attendees"],
+        "member_tags": ["member_tags"],
+        "posts": ["posts"],
+    }
+        
+except Exception as e:
+    logger.error(f"❌ Error setting Airbyte configuration: {e}")
     raise e
