@@ -83,7 +83,9 @@ potential_business_tags AS (
             'individuals',  -- Plural form
             'team',
             'member',
-            'staff'
+            'staff',
+            'partner',
+            'checklist completed'
         )
         -- Exclude very long names (likely course titles)
         AND LENGTH(mt.tag_name) <= 100
@@ -136,5 +138,4 @@ SELECT
     transformed_at
 FROM ranked_businesses
 ORDER BY 
-    business_rank,
-    actual_member_count DESC
+    business_name ASC

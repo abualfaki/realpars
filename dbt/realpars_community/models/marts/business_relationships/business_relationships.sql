@@ -30,7 +30,6 @@ members_with_tags AS (
     -- Filter to members who have tags
     SELECT
         community_member_id,
-        member_id,
         first_name,
         last_name,
         full_name,
@@ -51,7 +50,6 @@ managers AS (
     -- Find members who are managers (have both Manager and Business tag IDs)
     SELECT DISTINCT
         m.community_member_id as manager_community_id,
-        m.member_id as manager_member_id,
         m.first_name as manager_first_name,
         m.last_name as manager_last_name,
         m.full_name as manager_full_name,
@@ -69,7 +67,6 @@ manager_business_mapping AS (
     -- Map managers to their business names using tag IDs
     SELECT
         m.manager_community_id,
-        m.manager_member_id,
         m.manager_first_name,
         m.manager_last_name,
         m.manager_full_name,
@@ -90,7 +87,6 @@ team_members AS (
     -- Find team members for each business (have Business tag ID but NOT Manager tag ID)
     SELECT
         m.community_member_id as member_community_id,
-        m.member_id as member_member_id,
         m.first_name as member_first_name,
         m.last_name as member_last_name,
         m.full_name as member_full_name,
@@ -127,7 +123,6 @@ business_relationships AS (
         
         -- Manager info
         mb.manager_community_id,
-        mb.manager_member_id,
         mb.manager_first_name,
         mb.manager_last_name,
         mb.manager_full_name,
@@ -135,7 +130,6 @@ business_relationships AS (
         
         -- Team member info
         tm.member_community_id,
-        tm.member_member_id,
         tm.member_first_name,
         tm.member_last_name,
         tm.member_full_name,
@@ -183,4 +177,4 @@ ORDER BY
     manager_email,
     member_email */
 
-SELECT COUNT(DISTINCT business_tag_id) FROM business_relationships
+SELECT DISTINCT manager_full_name, business_name FROM business_relationships ORDER BY manager_full_name
