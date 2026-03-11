@@ -63,7 +63,7 @@ managers AS (
         AND s.business_tag_id IN UNNEST(m.tag_ids)
 ),
 
-manager_business_mapping AS (
+manager_business_assignments AS (
     -- Map managers to their business names using tag IDs
     SELECT
         m.manager_community_id,
@@ -74,7 +74,6 @@ manager_business_mapping AS (
         b.business_name,
         CAST(b.tag_id AS INT64) as business_tag_id,
         b.actual_member_count as business_total_members,
-        GREATEST(b.actual_member_count - 1, 0) as team_size,
         b.business_size,
         b.confidence_level as business_confidence
     FROM managers m
@@ -82,6 +81,33 @@ manager_business_mapping AS (
     WHERE 
         -- Manager has this business tag ID
         CAST(b.tag_id AS INT64) IN UNNEST(m.manager_tag_ids)
+),
+
+manager_counts AS (
+    -- Count how many managers are mapped to each business.
+    SELECT
+        business_tag_id,
+        COUNT(DISTINCT manager_community_id) as manager_count
+    FROM manager_business_assignments
+    GROUP BY business_tag_id
+),
+
+manager_business_mapping AS (
+    SELECT
+        mba.manager_community_id,
+        mba.manager_first_name,
+        mba.manager_last_name,
+        mba.manager_full_name,
+        mba.manager_email,
+        mba.business_name,
+        mba.business_tag_id,
+        mba.business_total_members,
+        GREATEST(mba.business_total_members - COALESCE(mc.manager_count, 0), 0) as team_size,
+        mba.business_size,
+        mba.business_confidence
+    FROM manager_business_assignments mba
+    LEFT JOIN manager_counts mc
+        ON mc.business_tag_id = mba.business_tag_id
 ),
 
 team_members AS (
@@ -175,35 +201,7 @@ SELECT
     relationship_type,
     transformed_at
 FROM business_relationships
-WHERE business_name = "Heineken"
 ORDER BY 
     business_name,
     manager_email,
     member_email
-
-/*
-SELECT 
-    business_name,
-    business_tag_id,
-    business_total_members,
-    business_size,
-    business_confidence,
-    manager_community_id,
-    manager_first_name,
-    manager_last_name,
-    manager_full_name,
-    manager_email,
-    member_community_id,
-    member_first_name,
-    member_last_name,
-    member_full_name,
-    member_email,
-    member_profile_completeness,
-    relationship_type,
-    transformed_at
-FROM business_relationships
-ORDER BY 
-    business_name,
-    manager_email,
-    member_email 
-*/
