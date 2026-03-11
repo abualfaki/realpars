@@ -56,7 +56,7 @@ SELECT
     ) AS team_members,
     
     -- Summary metrics
-    COUNT(*) AS team_size,
+    GREATEST(MAX(business_total_members) - 1, 0) AS team_size,
     SUM(team_member.classes_attended) AS total_classes_attended,
     SUM(team_member.lessons_completed) AS total_lessons_completed,
     SUM(team_member.likes_received) AS total_likes_received,

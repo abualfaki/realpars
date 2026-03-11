@@ -74,6 +74,7 @@ manager_business_mapping AS (
         b.business_name,
         CAST(b.tag_id AS INT64) as business_tag_id,
         b.actual_member_count as business_total_members,
+        GREATEST(b.actual_member_count - 1, 0) as team_size,
         b.business_size,
         b.confidence_level as business_confidence
     FROM managers m
@@ -118,6 +119,7 @@ business_relationships AS (
         mb.business_name,
         mb.business_tag_id,
         mb.business_total_members,
+        mb.team_size,
         mb.business_size,
         mb.business_confidence,
         
@@ -152,7 +154,35 @@ business_relationships AS (
         ON tm.business_tag_id = mb.business_tag_id
 )
 
-/*SELECT 
+SELECT 
+    business_name,
+    business_tag_id,
+    business_total_members,
+    team_size,
+    business_size,
+    business_confidence,
+    manager_community_id,
+    manager_first_name,
+    manager_last_name,
+    manager_full_name,
+    manager_email,
+    member_community_id,
+    member_first_name,
+    member_last_name,
+    member_full_name,
+    member_email,
+    member_profile_completeness,
+    relationship_type,
+    transformed_at
+FROM business_relationships
+WHERE business_name = "Heineken"
+ORDER BY 
+    business_name,
+    manager_email,
+    member_email
+
+/*
+SELECT 
     business_name,
     business_tag_id,
     business_total_members,
@@ -175,6 +205,5 @@ FROM business_relationships
 ORDER BY 
     business_name,
     manager_email,
-    member_email */
-
-SELECT DISTINCT manager_full_name, business_name FROM business_relationships ORDER BY manager_full_name
+    member_email 
+*/

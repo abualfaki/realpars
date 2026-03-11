@@ -39,6 +39,7 @@ WITH current_week_engagement AS (
         wer.manager_first_name,
         wer.manager_last_name,
         wer.business_name,
+        wer.business_total_members,
         wer.week_start_date,
         wer.week_end_date,
         
@@ -199,7 +200,7 @@ team_summary AS (
         week_start_date,
         week_end_date,
         
-        COUNT(*) AS team_size,
+        GREATEST(MAX(business_total_members) - 1, 0) AS team_size,
         COUNT(CASE WHEN has_activity THEN 1 END) AS active_members,
         COUNT(CASE WHEN total_points = 0 THEN 1 END) AS inactive_members,
         

@@ -74,6 +74,7 @@ final_output AS (
         -- Business & Manager Info
         bm.business_name,
         bm.business_tag_id,
+        bm.business_total_members,
         bm.business_size,
         bm.business_confidence,
         bm.manager_community_id,
