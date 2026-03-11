@@ -102,7 +102,7 @@ manager_business_mapping AS (
         mba.business_name,
         mba.business_tag_id,
         mba.business_total_members,
-        GREATEST(mba.business_total_members - COALESCE(mc.manager_count, 0), 0) as team_size,
+        GREATEST(mba.business_total_members - COALESCE(mc.manager_count, 0), 0) as team_size, -- Exludes manager count
         mba.business_size,
         mba.business_confidence
     FROM manager_business_assignments mba
