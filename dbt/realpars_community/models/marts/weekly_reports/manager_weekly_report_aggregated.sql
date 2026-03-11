@@ -40,35 +40,51 @@ manager_team_data AS (
     FROM {{ ref('weekly_team_engagement_report') }} wer
     CROSS JOIN latest_week lw
     WHERE wer.week_start_date = lw.latest_week_start
+),
+
+manager_team_size AS (
+    -- Use precomputed team size from business_relationships (handles multi-manager businesses).
+    SELECT
+        manager_email,
+        business_name,
+        MAX(team_size) as team_size
+    FROM {{ ref('business_relationships') }}
+    GROUP BY
+        manager_email,
+        business_name
 )
 
 SELECT 
-    manager_email,
-    manager_full_name as manager_name,
-    business_name,
-    week_start_date,
-    week_end_date,
+    mtd.manager_email,
+    mtd.manager_full_name as manager_name,
+    mtd.business_name,
+    mtd.week_start_date,
+    mtd.week_end_date,
     
     -- Aggregate team member data
     ARRAY_AGG(
-        team_member 
-        ORDER BY team_member.total_engagement_score DESC
+        mtd.team_member 
+        ORDER BY mtd.team_member.total_engagement_score DESC
     ) AS team_members,
     
     -- Summary metrics
-    GREATEST(MAX(business_total_members) - 1, 0) AS team_size,
-    SUM(team_member.classes_attended) AS total_classes_attended,
-    SUM(team_member.lessons_completed) AS total_lessons_completed,
-    SUM(team_member.likes_received) AS total_likes_received,
-    SUM(team_member.comments_received) AS total_comments_received,
-    SUM(team_member.comments_made) AS total_comments_made,
-    SUM(team_member.total_engagement_score) AS team_total_engagement_score,
-    ROUND(AVG(team_member.total_engagement_score), 2) AS avg_engagement_score_per_member
+    COALESCE(mts.team_size, COUNT(*)) AS team_size,
+    SUM(mtd.team_member.classes_attended) AS total_classes_attended,
+    SUM(mtd.team_member.lessons_completed) AS total_lessons_completed,
+    SUM(mtd.team_member.likes_received) AS total_likes_received,
+    SUM(mtd.team_member.comments_received) AS total_comments_received,
+    SUM(mtd.team_member.comments_made) AS total_comments_made,
+    SUM(mtd.team_member.total_engagement_score) AS team_total_engagement_score,
+    ROUND(AVG(mtd.team_member.total_engagement_score), 2) AS avg_engagement_score_per_member
     
-FROM manager_team_data
+FROM manager_team_data mtd
+LEFT JOIN manager_team_size mts
+    ON mts.manager_email = mtd.manager_email
+    AND mts.business_name = mtd.business_name
 GROUP BY 
-    manager_email,
-    manager_full_name,
-    business_name,
-    week_start_date,
-    week_end_date
+    mtd.manager_email,
+    mtd.manager_full_name,
+    mtd.business_name,
+    mtd.week_start_date,
+    mtd.week_end_date,
+    mts.team_size

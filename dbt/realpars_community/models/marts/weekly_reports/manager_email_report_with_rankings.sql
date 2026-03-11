@@ -39,7 +39,6 @@ WITH current_week_engagement AS (
         wer.manager_first_name,
         wer.manager_last_name,
         wer.business_name,
-        wer.business_total_members,
         wer.week_start_date,
         wer.week_end_date,
         
@@ -191,40 +190,56 @@ member_with_labels AS (
     FROM member_with_comparison
 ),
 
+manager_team_size AS (
+    -- Use precomputed team size from business_relationships (handles multi-manager businesses).
+    SELECT
+        manager_email,
+        business_name,
+        MAX(team_size) as team_size
+    FROM {{ ref('business_relationships') }}
+    GROUP BY
+        manager_email,
+        business_name
+),
+
 team_summary AS (
     -- Aggregate team-level statistics per manager
     SELECT 
-        manager_email,
-        manager_full_name,
-        business_name,
-        week_start_date,
-        week_end_date,
+        mwl.manager_email,
+        mwl.manager_full_name,
+        mwl.business_name,
+        mwl.week_start_date,
+        mwl.week_end_date,
         
-        GREATEST(MAX(business_total_members) - 1, 0) AS team_size,
-        COUNT(CASE WHEN has_activity THEN 1 END) AS active_members,
-        COUNT(CASE WHEN total_points = 0 THEN 1 END) AS inactive_members,
+        COALESCE(mts.team_size, COUNT(*)) AS team_size,
+        COUNT(CASE WHEN mwl.has_activity THEN 1 END) AS active_members,
+        COUNT(CASE WHEN mwl.total_points = 0 THEN 1 END) AS inactive_members,
         
-        SUM(total_points) AS team_total_points,
-        ROUND(AVG(total_points), 1) AS team_avg_points,
-        MAX(total_points) AS team_max_points,
+        SUM(mwl.total_points) AS team_total_points,
+        ROUND(AVG(mwl.total_points), 1) AS team_avg_points,
+        MAX(mwl.total_points) AS team_max_points,
         
-        SUM(points_change) AS team_points_change,
-        ROUND(AVG(points_change), 1) AS team_avg_points_change,
+        SUM(mwl.points_change) AS team_points_change,
+        ROUND(AVG(mwl.points_change), 1) AS team_avg_points_change,
         
         -- Engagement breakdown
-        SUM(classes_attended) AS team_classes_attended,
-        SUM(lessons_completed) AS team_lessons_completed,
-        SUM(likes_received) AS team_likes_received,
-        SUM(comments_received) AS team_comments_received,
-        SUM(comments_made) AS team_comments_made
+        SUM(mwl.classes_attended) AS team_classes_attended,
+        SUM(mwl.lessons_completed) AS team_lessons_completed,
+        SUM(mwl.likes_received) AS team_likes_received,
+        SUM(mwl.comments_received) AS team_comments_received,
+        SUM(mwl.comments_made) AS team_comments_made
         
-    FROM member_with_labels
+    FROM member_with_labels mwl
+    LEFT JOIN manager_team_size mts
+        ON mts.manager_email = mwl.manager_email
+        AND mts.business_name = mwl.business_name
     GROUP BY 
-        manager_email,
-        manager_full_name,
-        business_name,
-        week_start_date,
-        week_end_date
+        mwl.manager_email,
+        mwl.manager_full_name,
+        mwl.business_name,
+        mwl.week_start_date,
+        mwl.week_end_date,
+        mts.team_size
 )
 
 -- Final output: Denormalized structure optimized for Make.com consumption
