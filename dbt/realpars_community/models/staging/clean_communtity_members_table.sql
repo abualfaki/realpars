@@ -3,7 +3,6 @@ WITH source AS (
     FROM {{ source('raw_cc_data', 'community_members') }}
     WHERE 
         community_member_id IS NOT NULL
-        OR member_id IS NOT NULL
         OR email IS NOT NULL
 ),
 
