@@ -1,4 +1,5 @@
 airbyte
+requests>=2.31.0  # HTTP library for API calls
 
 
 # Data Manipulation
@@ -24,6 +25,9 @@ google-cloud-logging>=3.5.0  # Added for Google Cloud logging support
 
 # Google BigQuery
 google-cloud-bigquery>=3.11.0
+
+# Data Transformations
+dbt-bigquery>=1.0.0  # For dbt BigQuery integration
 
 # Google API Client
 google-api-python-client>=2.90.0
