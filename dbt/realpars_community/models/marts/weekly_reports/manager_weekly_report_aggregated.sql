@@ -42,12 +42,13 @@ manager_team_data AS (
     WHERE wer.week_start_date = lw.latest_week_start
 ),
 
-manager_team_size AS (
-    -- Use precomputed team size from business_relationships (handles multi-manager businesses).
+manager_team_stats AS (
+    -- Use precomputed team stats from business_relationships (handles multi-manager businesses).
     SELECT
         manager_email,
         business_name,
-        MAX(team_size) as team_size
+        MAX(team_size) as team_size,
+        MAX(business_total_members) as business_total_members
     FROM {{ ref('business_relationships') }}
     GROUP BY
         manager_email,
@@ -69,6 +70,7 @@ SELECT
     
     -- Summary metrics
     COALESCE(mts.team_size, COUNT(*)) AS team_size,
+    COALESCE(mts.business_total_members, COUNT(*)) AS business_total_members,
     SUM(mtd.team_member.classes_attended) AS total_classes_attended,
     SUM(mtd.team_member.lessons_completed) AS total_lessons_completed,
     SUM(mtd.team_member.likes_received) AS total_likes_received,
@@ -78,7 +80,7 @@ SELECT
     ROUND(AVG(mtd.team_member.total_engagement_score), 2) AS avg_engagement_score_per_member
     
 FROM manager_team_data mtd
-LEFT JOIN manager_team_size mts
+LEFT JOIN manager_team_stats mts
     ON mts.manager_email = mtd.manager_email
     AND mts.business_name = mtd.business_name
 GROUP BY 
@@ -87,4 +89,5 @@ GROUP BY
     mtd.business_name,
     mtd.week_start_date,
     mtd.week_end_date,
-    mts.team_size
+    mts.team_size,
+    mts.business_total_members
