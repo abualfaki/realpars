@@ -61,4 +61,4 @@ GROUP BY
   week_start_formatted,
   week_end_formatted,
   report_generated_at
-ORDER BY manager_email
+ORDER BY business_name, manager_full_name
