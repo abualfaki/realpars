@@ -190,12 +190,13 @@ member_with_labels AS (
     FROM member_with_comparison
 ),
 
-manager_team_size AS (
-    -- Use precomputed team size from business_relationships (handles multi-manager businesses).
+manager_team_stats AS (
+    -- Use precomputed team stats from business_relationships (handles multi-manager businesses).
     SELECT
         manager_email,
         business_name,
-        MAX(team_size) as team_size
+        MAX(team_size) as team_size,
+        MAX(business_total_members) as business_total_members
     FROM {{ ref('business_relationships') }}
     GROUP BY
         manager_email,
@@ -212,6 +213,7 @@ team_summary AS (
         mwl.week_end_date,
         
         COALESCE(mts.team_size, COUNT(*)) AS team_size,
+        COALESCE(mts.business_total_members, COUNT(*)) AS business_total_members,
         COUNT(CASE WHEN mwl.has_activity THEN 1 END) AS active_members,
         COUNT(CASE WHEN mwl.total_points = 0 THEN 1 END) AS inactive_members,
         
@@ -230,7 +232,7 @@ team_summary AS (
         SUM(mwl.comments_made) AS team_comments_made
         
     FROM member_with_labels mwl
-    LEFT JOIN manager_team_size mts
+    LEFT JOIN manager_team_stats mts
         ON mts.manager_email = mwl.manager_email
         AND mts.business_name = mwl.business_name
     GROUP BY 
@@ -239,7 +241,8 @@ team_summary AS (
         mwl.business_name,
         mwl.week_start_date,
         mwl.week_end_date,
-        mts.team_size
+        mts.team_size,
+        mts.business_total_members
 )
 
 -- Final output: Denormalized structure optimized for Make.com consumption
@@ -295,6 +298,7 @@ SELECT
     
     -- Team Summary (denormalized for convenience)
     ts.team_size,
+    ts.business_total_members,
     ts.active_members,
     ts.inactive_members,
     ts.team_total_points,
