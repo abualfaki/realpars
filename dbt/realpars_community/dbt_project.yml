@@ -36,6 +36,9 @@ models:
         +schema: cc_stg_weekly_reports
         +tags: ['marts','weekly_reports']
 
+        make_com_weekly_report:
+          +schema: cc_make_com_weekly_reports
+
       business_members_relationships:
         +schema: cc_business_members_relationships
         +tags: ['marts','business_relationships']
