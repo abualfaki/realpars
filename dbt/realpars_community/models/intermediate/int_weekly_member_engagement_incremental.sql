@@ -259,5 +259,3 @@ select
     is_backfill,
     dbt_updated_at
 from final_output
-where week_start_date != "2026-03-09"
-order by week_start_date desc
