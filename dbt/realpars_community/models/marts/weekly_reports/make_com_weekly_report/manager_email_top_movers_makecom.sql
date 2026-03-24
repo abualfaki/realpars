@@ -100,86 +100,86 @@ aggregated AS (
 )
 
 SELECT
-    manager_email,
-    manager_full_name,
-    business_name,
-    week_start_date,
-    week_end_date,
-    week_start_formatted,
-    week_end_formatted,
-    count_movers,
-    top_mover_1_name,
-    top_mover_1_prev_points,
-    top_mover_1_change,
-    top_mover_2_name,
-    top_mover_2_prev_points,
-    top_mover_2_change,
-    top_mover_3_name,
-    top_mover_3_prev_points,
-    top_mover_3_change,
+    aggregated.manager_email,
+    aggregated.manager_full_name,
+    aggregated.business_name,
+    aggregated.week_start_date,
+    aggregated.week_end_date,
+    aggregated.week_start_formatted,
+    aggregated.week_end_formatted,
+    aggregated.count_movers,
+    aggregated.top_mover_1_name,
+    aggregated.top_mover_1_prev_points,
+    aggregated.top_mover_1_change,
+    aggregated.top_mover_2_name,
+    aggregated.top_mover_2_prev_points,
+    aggregated.top_mover_2_change,
+    aggregated.top_mover_3_name,
+    aggregated.top_mover_3_prev_points,
+    aggregated.top_mover_3_change,
     CASE
-        WHEN count_movers = 0 AND COALESCE(top_performer_counts.count_top_performers, 0) > 0
+        WHEN aggregated.count_movers = 0 AND COALESCE(top_performer_counts.count_top_performers, 0) > 0
             THEN 'Your top performers did well, but their points stayed flat or dropped compared with last week.'
         ELSE ''
     END AS top_movers_context_note,
     CASE
-        WHEN count_movers = 0 THEN '<li>No top movers this week.</li>'
-        WHEN count_movers = 1 THEN CONCAT(
-            '<li>🚀 <strong>', top_mover_1_name, '</strong> — +', CAST(top_mover_1_change AS STRING), ' pts',
+        WHEN aggregated.count_movers = 0 THEN '<li>No top movers this week.</li>'
+        WHEN aggregated.count_movers = 1 THEN CONCAT(
+            '<li>🚀 <strong>', aggregated.top_mover_1_name, '</strong> — +', CAST(aggregated.top_mover_1_change AS STRING), ' pts',
             ' (',
             CASE
-                WHEN COALESCE(top_mover_1_prev_points, 0) = 0 THEN 'strong jump this week'
-                WHEN SAFE_DIVIDE(top_mover_1_change, top_mover_1_prev_points) >= 0.5 THEN 'strong jump this week'
+                WHEN COALESCE(aggregated.top_mover_1_prev_points, 0) = 0 THEN 'strong jump this week'
+                WHEN SAFE_DIVIDE(aggregated.top_mover_1_change, aggregated.top_mover_1_prev_points) >= 0.5 THEN 'strong jump this week'
                 ELSE 'steady progress'
             END,
             ')</li>'
         )
-        WHEN count_movers = 2 THEN CONCAT(
-            '<li>🚀 <strong>', top_mover_1_name, '</strong> — +', CAST(top_mover_1_change AS STRING), ' pts',
+        WHEN aggregated.count_movers = 2 THEN CONCAT(
+            '<li>🚀 <strong>', aggregated.top_mover_1_name, '</strong> — +', CAST(aggregated.top_mover_1_change AS STRING), ' pts',
             ' (',
             CASE
-                WHEN COALESCE(top_mover_1_prev_points, 0) = 0 THEN 'strong jump this week'
-                WHEN SAFE_DIVIDE(top_mover_1_change, top_mover_1_prev_points) >= 0.5 THEN 'strong jump this week'
+                WHEN COALESCE(aggregated.top_mover_1_prev_points, 0) = 0 THEN 'strong jump this week'
+                WHEN SAFE_DIVIDE(aggregated.top_mover_1_change, aggregated.top_mover_1_prev_points) >= 0.5 THEN 'strong jump this week'
                 ELSE 'steady progress'
             END,
             ')</li>',
-            '<li>📈 <strong>', top_mover_2_name, '</strong> — +', CAST(top_mover_2_change AS STRING), ' pts',
+            '<li>📈 <strong>', aggregated.top_mover_2_name, '</strong> — +', CAST(aggregated.top_mover_2_change AS STRING), ' pts',
             ' (',
             CASE
-                WHEN COALESCE(top_mover_2_prev_points, 0) = 0 THEN 'strong jump this week'
-                WHEN SAFE_DIVIDE(top_mover_2_change, top_mover_2_prev_points) >= 0.5 THEN 'strong jump this week'
+                WHEN COALESCE(aggregated.top_mover_2_prev_points, 0) = 0 THEN 'strong jump this week'
+                WHEN SAFE_DIVIDE(aggregated.top_mover_2_change, aggregated.top_mover_2_prev_points) >= 0.5 THEN 'strong jump this week'
                 ELSE 'steady progress'
             END,
             ')</li>'
         )
         ELSE CONCAT(
-            '<li>🚀 <strong>', top_mover_1_name, '</strong> — +', CAST(top_mover_1_change AS STRING), ' pts',
+            '<li>🚀 <strong>', aggregated.top_mover_1_name, '</strong> — +', CAST(aggregated.top_mover_1_change AS STRING), ' pts',
             ' (',
             CASE
-                WHEN COALESCE(top_mover_1_prev_points, 0) = 0 THEN 'strong jump this week'
-                WHEN SAFE_DIVIDE(top_mover_1_change, top_mover_1_prev_points) >= 0.5 THEN 'strong jump this week'
+                WHEN COALESCE(aggregated.top_mover_1_prev_points, 0) = 0 THEN 'strong jump this week'
+                WHEN SAFE_DIVIDE(aggregated.top_mover_1_change, aggregated.top_mover_1_prev_points) >= 0.5 THEN 'strong jump this week'
                 ELSE 'steady progress'
             END,
             ')</li>',
-            '<li>📈 <strong>', top_mover_2_name, '</strong> — +', CAST(top_mover_2_change AS STRING), ' pts',
+            '<li>📈 <strong>', aggregated.top_mover_2_name, '</strong> — +', CAST(aggregated.top_mover_2_change AS STRING), ' pts',
             ' (',
             CASE
-                WHEN COALESCE(top_mover_2_prev_points, 0) = 0 THEN 'strong jump this week'
-                WHEN SAFE_DIVIDE(top_mover_2_change, top_mover_2_prev_points) >= 0.5 THEN 'strong jump this week'
+                WHEN COALESCE(aggregated.top_mover_2_prev_points, 0) = 0 THEN 'strong jump this week'
+                WHEN SAFE_DIVIDE(aggregated.top_mover_2_change, aggregated.top_mover_2_prev_points) >= 0.5 THEN 'strong jump this week'
                 ELSE 'steady progress'
             END,
             ')</li>',
-            '<li>⬆️ <strong>', top_mover_3_name, '</strong> — +', CAST(top_mover_3_change AS STRING), ' pts',
+            '<li>⬆️ <strong>', aggregated.top_mover_3_name, '</strong> — +', CAST(aggregated.top_mover_3_change AS STRING), ' pts',
             ' (',
             CASE
-                WHEN COALESCE(top_mover_3_prev_points, 0) = 0 THEN 'strong jump this week'
-                WHEN SAFE_DIVIDE(top_mover_3_change, top_mover_3_prev_points) >= 0.5 THEN 'strong jump this week'
+                WHEN COALESCE(aggregated.top_mover_3_prev_points, 0) = 0 THEN 'strong jump this week'
+                WHEN SAFE_DIVIDE(aggregated.top_mover_3_change, aggregated.top_mover_3_prev_points) >= 0.5 THEN 'strong jump this week'
                 ELSE 'steady progress'
             END,
             ')</li>'
         )
     END AS top_movers_html,
-    report_generated_at
+    aggregated.report_generated_at
 FROM aggregated
 LEFT JOIN (
     SELECT
@@ -191,4 +191,4 @@ LEFT JOIN (
 ) top_performer_counts
     ON aggregated.manager_email = top_performer_counts.manager_email
    AND aggregated.week_start_date = top_performer_counts.week_start_date
-ORDER BY manager_email, week_start_date DESC
+ORDER BY aggregated.manager_email, aggregated.week_start_date DESC
