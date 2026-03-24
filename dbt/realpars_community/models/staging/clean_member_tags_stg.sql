@@ -152,8 +152,22 @@ SELECT
     tag_id,
     tag_name,
     tag_color,
+    tag_emoji,
+    is_public,
+    display_format,
+    show_in_member_directory,
+    show_in_post_bio,
+    show_in_profile_page,
     tagged_members_count,
-    created_date
+    created_at,
+    updated_at,
+    last_synced_at,
+    airbyte_record_id,
+    tag_category,
+    visible_beside_name,
+    course_name,
+    days_since_created,
+    created_date,
+    created_year,
+    created_month
 FROM enriched_tags
-WHERE tag_category = 'potential_business_name'
-ORDER BY tagged_members_count DESC, created_at DESC
