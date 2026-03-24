@@ -1,7 +1,7 @@
 {{
     config(
         materialized='table',
-        schema='stg_weekly_reports',
+        schema='cc_stg_weekly_reports',
         partition_by={
             "field": "week_start_date",
             "data_type": "date",
