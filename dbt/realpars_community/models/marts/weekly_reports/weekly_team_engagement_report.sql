@@ -68,6 +68,15 @@ business_mapping AS (
     -- No filter - include all businesses (with or without team members)
 ),
 
+latest_week AS (
+    -- Get the latest week from engagement data
+    SELECT 
+        MAX(week_start_date) as week_start_date,
+        MAX(week_end_date) as week_end_date
+    FROM {{ ref('int_weekly_member_engagement_incremental') }}
+    WHERE week_start_date IS NOT NULL
+),
+
 final_output AS (
 
     SELECT
@@ -89,9 +98,9 @@ final_output AS (
         bm.member_first_name,
         bm.member_last_name,
         
-        -- Week Info (may be NULL for members with no engagement)
-        te.week_start_date,
-        te.week_end_date,
+        -- Week Info (use latest week even if member has no engagement)
+        COALESCE(te.week_start_date, lw.week_start_date) as week_start_date,
+        COALESCE(te.week_end_date, lw.week_end_date) as week_end_date,
         
         -- Engagement Metrics (NULL safe with COALESCE)
         COALESCE(te.classes_attended, 0) as classes_attended,
@@ -110,11 +119,13 @@ final_output AS (
         CURRENT_TIMESTAMP() as report_generated_at
 
     FROM business_mapping bm
+    CROSS JOIN latest_week lw
     LEFT JOIN team_member_engagement te
         ON te.community_member_id = bm.member_community_id
+        AND te.week_start_date = lw.week_start_date
 
     ORDER BY 
-        te.week_start_date DESC,
+        week_start_date DESC,
         bm.member_email
 )
 
