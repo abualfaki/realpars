@@ -269,3 +269,56 @@ models:
         
       - name: team_total_engagement
         description: Sum of all team engagement this week
+
+  - name: manager_email_monthly_courses_completed_makecom
+    description: |
+      Make.com-ready monthly course completion report with one row per manager and business.
+
+      Includes HTML-ready columns that can be directly embedded in Gmail nodes:
+      - courses_completed_rows_html: only table rows (`<tr>...</tr>`)
+      - courses_completed_table_html: full table markup with inline styles
+
+      The model uses the latest available month in course completion data.
+    columns:
+      - name: manager_email
+        description: Manager email used as the delivery target in Make.com
+        tests:
+          - not_null
+
+      - name: manager_full_name
+        description: Full manager name for personalization
+
+      - name: business_name
+        description: Business name associated with the manager/team
+
+      - name: report_month_start_date
+        description: First day of the reporting month
+        tests:
+          - not_null
+
+      - name: report_month_formatted
+        description: Human-readable month label (for example, March 2026)
+
+      - name: total_distinct_courses
+        description: Count of distinct courses completed by the team in the month
+
+      - name: total_course_completions
+        description: Total count of member-course completions in the month
+
+      - name: team_size
+        description: Total number of team members (used in email summary)
+
+      - name: unique_learners_count
+        description: Count of team members who completed at least 1 course
+
+      - name: zero_completions_members_list
+        description: Comma-separated list of member names with 0 completions (or "None 🎉" if all completed something)
+
+      - name: courses_completed_rows_html
+        description: HTML rows only (`<tr>...</tr>`) for custom template insertion
+
+      - name: courses_completed_table_html
+        description: Full HTML table with inline styles for direct Gmail embedding
+
+      - name: report_generated_at
+        description: Timestamp when the row was generated
