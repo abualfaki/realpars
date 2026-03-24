@@ -39,3 +39,6 @@ sources:
 
       - name: post_liked
         description: "List of all posts liked by circle community members"
+
+      - name: managers_not_joined
+        description: "Client-maintained manager roster loaded from GCS (includes invited and profile-completion status)"
