@@ -63,7 +63,7 @@ managers AS (
         AND s.business_tag_id IN UNNEST(m.tag_ids)
 ),
 
-manager_business_assignments AS (
+community_manager_business_assignments AS (
     -- Map managers to their business names using tag IDs
     SELECT
         m.manager_community_id,
@@ -75,7 +75,12 @@ manager_business_assignments AS (
         CAST(b.tag_id AS INT64) as business_tag_id,
         b.actual_member_count as business_total_members,
         b.business_size,
-        b.confidence_level as business_confidence
+        b.confidence_level as business_confidence,
+        true as manager_in_community,
+        'community' as manager_source,
+        cast(null as string) as invitation_status,
+        cast(null as timestamp) as invitation_date,
+        cast(null as timestamp) as join_date
     FROM managers m
     CROSS JOIN {{ ref('business_names_list') }} b
     WHERE 
@@ -83,12 +88,64 @@ manager_business_assignments AS (
         CAST(b.tag_id AS INT64) IN UNNEST(m.manager_tag_ids)
 ),
 
+invited_manager_business_assignments AS (
+    -- Map invited/non-profile-complete managers from client CSV to known business names.
+    SELECT
+        cast(im.manager_id as int64) as manager_community_id,
+        im.first_name as manager_first_name,
+        im.last_name as manager_last_name,
+        im.manager_full_name,
+        im.manager_email,
+        b.business_name,
+        cast(b.tag_id as int64) as business_tag_id,
+        b.actual_member_count as business_total_members,
+        b.business_size,
+        b.confidence_level as business_confidence,
+        coalesce(im.member_in_community, false) as manager_in_community,
+        'invited_csv' as manager_source,
+        im.invitation_status,
+        im.invitation_date,
+        im.join_date
+    from {{ ref('clean_managers_not_joined_table') }} im
+    inner join {{ ref('business_names_list') }} b
+        -- Use exact name matching after normalizing case + internal whitespace only.
+        -- Avoid stripping characters (like uppercase letters), which can collapse names (e.g., "CMC" -> "").
+        on regexp_replace(lower(trim(im.business_name_from_tags)), r'\s+', ' ')
+         = regexp_replace(lower(trim(b.business_name)), r'\s+', ' ')
+    where im.business_name_from_tags is not null
+),
+
+manager_business_assignments AS (
+    select * from community_manager_business_assignments
+    union all
+    select * from invited_manager_business_assignments
+),
+
+deduped_manager_business_assignments AS (
+    select
+        * except (dedupe_rank)
+    from (
+        select
+            *,
+            row_number() over (
+                partition by lower(manager_email), business_tag_id
+                order by
+                    case when manager_source = 'community' then 1 else 2 end,
+                    manager_in_community desc,
+                    invitation_date desc
+            ) as dedupe_rank
+        from manager_business_assignments
+    )
+    where dedupe_rank = 1
+),
+
 manager_counts AS (
-    -- Count how many managers are mapped to each business.
+    -- Count community-active managers per business for team size math.
     SELECT
         business_tag_id,
         COUNT(DISTINCT manager_community_id) as manager_count
-    FROM manager_business_assignments
+    FROM deduped_manager_business_assignments
+    where manager_in_community = true
     GROUP BY business_tag_id
 ),
 
@@ -99,13 +156,18 @@ manager_business_mapping AS (
         mba.manager_last_name,
         mba.manager_full_name,
         mba.manager_email,
+        mba.manager_source,
+        mba.manager_in_community,
+        mba.invitation_status,
+        mba.invitation_date,
+        mba.join_date,
         mba.business_name,
         mba.business_tag_id,
         mba.business_total_members,
         GREATEST(mba.business_total_members - COALESCE(mc.manager_count, 0), 0) as team_size, -- Exludes manager count
         mba.business_size,
         mba.business_confidence
-    FROM manager_business_assignments mba
+    FROM deduped_manager_business_assignments mba
     LEFT JOIN manager_counts mc
         ON mc.business_tag_id = mba.business_tag_id
 ),
@@ -155,6 +217,11 @@ business_relationships AS (
         mb.manager_last_name,
         mb.manager_full_name,
         mb.manager_email,
+        mb.manager_source,
+        mb.manager_in_community,
+        mb.invitation_status,
+        mb.invitation_date,
+        mb.join_date,
         
         -- Team member info
         tm.member_community_id,
@@ -192,6 +259,11 @@ SELECT
     manager_last_name,
     manager_full_name,
     manager_email,
+    manager_source,
+    manager_in_community,
+    invitation_status,
+    invitation_date,
+    join_date,
     member_community_id,
     member_first_name,
     member_last_name,
