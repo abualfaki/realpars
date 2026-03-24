@@ -12,6 +12,13 @@ functions-framework==3.10.0 # latest version as of 2024-09-03
 # Loadning Environment variables
 python-dotenv>=1.0.0
 
+# Orchestration
+dagster>=1.7.0
+dagster-airbyte>=0.23.0
+dagster-dbt>=0.23.0
+dagster-gcp>=0.23.0
+dagster-webserver>=1.7.0
+
 #### Google services ####
 
 # Authentication
