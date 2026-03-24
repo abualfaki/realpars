@@ -111,5 +111,5 @@ FROM businesses_without_managers bwm
 LEFT JOIN member_list_aggregated mla
     ON bwm.business_tag_id = mla.business_tag_id
 ORDER BY 
-    bwm.actual_member_count DESC,
-    bwm.business_name
+    -- bwm.actual_member_count DESC,
+    bwm.business_name ASC
