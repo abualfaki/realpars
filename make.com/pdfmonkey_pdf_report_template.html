@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: letter;
+      margin: 0.4in;
+    }
+
+    /* Brutalist Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
+      background-color: #ffffff;
+      color: #000000;
+      font-size: 10pt;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Logo Section */
+    .logo-section {
+      padding: 24px 40px 20px 40px;
+      background-color: #ffffff;
+      text-align: center;
+    }
+
+    .section-divider {
+      width: calc(100% - 80px);
+      margin: 12px auto 0 auto;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .logo {
+      font-size: 14pt;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: #ffffff;
+      text-transform: uppercase;
+    }
+
+    .logo img {
+      display: block;
+      margin: 0 auto;
+      border: 0;
+    }
+
+    .first-page-block {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* Header */
+    .header {
+      background-color: #ffffff;
+      color: #000000;
+      padding: 32px 40px 24px 40px;
+    }
+
+    h1 {
+      font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
+      font-size: 28pt;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 0.95;
+      margin: 0 0 12px 0;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      font-size: 10pt;
+      color: #666666;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* Manager Info Block */
+    .manager-info {
+      padding: 24px 40px;
+      background-color: #ffffff;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .info-item {
+      margin-bottom: 12px;
+    }
+
+    .info-label {
+      font-size: 7pt;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #666666;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      font-size: 11pt;
+      color: #000000;
+      font-weight: 600;
+    }
+
+    /* Stats Block */
+    .stats-section {
+      padding: 24px 40px 24px 40px;
+      background-color: #ffffff;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .stats-card {
+      background-color: #ffffff;
+      color: #000000;
+      padding: 32px 32px 36px 32px;
+      text-align: center;
+      border: 2px solid #000000;
+    }
+
+    .stats-main {
+      margin-bottom: 24px;
+    }
+
+    .stats-label {
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: 400;
+      margin-bottom: 12px;
+      opacity: 0.7;
+    }
+
+    .stats-number {
+      font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
+      font-size: 72pt;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .stats-change {
+      margin-top: 16px;
+      font-size: 11pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .change-value {
+      font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
+      font-size: 28pt;
+      font-weight: 900;
+      margin: 0 8px;
+    }
+
+    .change-positive {
+      color: #000000;
+    }
+
+    .change-negative {
+      color: #666666;
+    }
+
+    /* Team Metrics Grid */
+    .metrics-section {
+      padding: 24px 40px 32px 40px;
+      background-color: #ffffff;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .metric-card {
+      border: 2px solid #000000;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 7pt;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #666666;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .metric-value {
+      font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
+      font-size: 32pt;
+      font-weight: 900;
+      color: #000000;
+      line-height: 1;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 64px;
+      padding: 32px 40px 0 40px;
+      font-size: 6.5pt;
+      color: #999999;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      text-align: center;
+    }
+
+    .footer-line {
+      margin: 6px 0;
+    }
+
+    .footer-line:first-child {
+      color: #666666;
+      font-weight: 600;
+    }
+
+    /* Top Performers Section */
+    .top-performers-section {
+      padding: 40px 40px;
+      background-color: #ffffff;
+      page-break-before: always;
+      break-before: page;
+    }
+
+    .top-performers-section h2 {
+      font-size: 18pt;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+
+    .top-performers-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #000000;
+    }
+
+    .top-performers-table thead {
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    .top-performers-table th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 9pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-right: 2px solid #e5e5e5;
+      border-bottom: 2px solid #000000;
+    }
+
+    .top-performers-table th:last-child {
+      border-right: none;
+    }
+
+    .top-performers-table td {
+      padding: 16px;
+      border-bottom: 1px solid #000000;
+      border-right: 2px solid #e5e5e5;
+    }
+
+    .top-performers-table td:last-child {
+      border-right: none;
+    }
+
+    .top-performers-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .rank-cell {
+      font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
+      font-size: 24pt;
+      font-weight: 900;
+      width: 80px;
+      text-align: center;
+    }
+
+    .name-cell {
+      font-size: 11pt;
+      font-weight: 600;
+    }
+
+    .score-cell {
+      font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
+      font-size: 18pt;
+      font-weight: 900;
+      text-align: right;
+      width: 120px;
+    }
+
+    /* Top Movers Section */
+    .top-movers-section {
+      padding: 40px 40px;
+      background-color: #ffffff;
+    }
+
+    .top-movers-section h2 {
+      font-size: 18pt;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+
+    .top-movers-list {
+      list-style-type: disc;
+      margin: 0;
+      padding-left: 22px;
+      font-size: 11pt;
+      line-height: 1.8;
+    }
+
+    .top-movers-list li {
+      margin-bottom: 6px;
+    }
+
+    .top-movers-name {
+      font-weight: 700;
+    }
+
+    .top-movers-change {
+      font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
+      font-weight: 900;
+    }
+    
+    .top-movers-section li,
+    .top-movers-section p {
+      font-size: 11pt;
+    }
+
+    /* Suggested Actions Section */
+    .suggested-actions-section {
+      padding: 40px 40px;
+      background-color: #ffffff;
+    }
+
+    .suggested-actions-section h2 {
+      font-size: 18pt;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+
+    .suggested-actions-list {
+      list-style-type: disc;
+      margin: 0;
+      padding-left: 22px;
+      font-size: 11pt;
+      line-height: 1.75;
+    }
+
+    .suggested-actions-list li {
+      margin-bottom: 8px;
+    }
+
+    .suggested-actions-section li,
+    .suggested-actions-section p {
+      font-size: 11pt;
+    }
+    
+    /* Team Breakdown Section */
+    .team-breakdown-section {
+      padding: 40px 40px;
+      background-color: #ffffff;
+      page-break-before: always;
+      break-before: page;
+    }
+
+    .team-breakdown-section h2 {
+      font-size: 18pt;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+
+    .team-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #000000;
+      background-color: #ffffff;
+      font-size: 8pt;
+    }
+
+    .team-table thead {
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    .team-table th {
+      padding: 10px 8px;
+      text-align: left;
+      font-size: 8pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      border-right: 2px solid #e5e5e5;
+      border-bottom: 2px solid #000000;
+    }
+
+    .team-table th:last-child {
+      border-right: none;
+    }
+
+    .team-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #e5e5e5;
+      border-right: 1px solid #e5e5e5;
+    }
+
+    .team-table td:last-child {
+      border-right: none;
+    }
+
+    .team-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .member-name {
+      font-weight: 600;
+      font-size: 8.5pt;
+    }
+
+    .stat {
+      text-align: center;
+      font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
+      font-size: 9pt;
+    }
+
+    .total-score {
+      text-align: center;
+      font-family: 'Inter', 'Helvetica', 'Arial', sans-serif;
+      font-weight: 900;
+      font-size: 10pt;
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <!-- Logo -->
+  <div class="logo-section">
+   <img src="https://storage.googleapis.com/project01-business-members-weekly-reporting/email-assets/RealPars-logo.png" width="224" style="display:block; border:0; margin:0 auto;">
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>TEAM SUMMARY</h1>
+    <div class="subtitle">Week {{ week_number }}, {{ year }}</div>
+  </div>
+
+  <div class="first-page-block">
+    <!-- Manager Info -->
+    <div class="manager-info">
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">Manager</div>
+          <div class="info-value">{{ manager_full_name }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Business</div>
+          <div class="info-value">{{ business_name }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Report Period</div>
+          <div class="info-value">{{ week_start_formatted }} - {{ week_end_formatted }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Generated</div>
+          <div class="info-value">{{ generated_date }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Stats - Team Score -->
+    <div class="stats-section">
+      <div class="stats-card">
+        <div class="stats-main">
+          <div class="stats-label">Total Team Score</div>
+          <div class="stats-number">{{ team_total_score }}</div>
+        </div>
+
+        <div class="stats-change">
+          Change from Last Week:
+          {% assign change_num = team_score_change | plus: 0 %}
+          <span class="change-value {% if change_num >= 0 %}change-positive{% else %}change-negative{% endif %}">
+            {% if change_num > 0 %}+{% endif %}{{ team_score_change }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Metrics -->
+    <div class="metrics-section">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Total Members</div>
+          <div class="metric-value">{{ total_team_members }}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Active</div>
+          <div class="metric-value">{{ active_members }}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Avg Score</div>
+          <div class="metric-value">{{ avg_score_per_member }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top 3 Performers -->
+  <div class="top-performers-section">
+    <h2>TOP 3 PERFORMERS</h2>
+    <table class="top-performers-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for performer in top_performers %}
+          {% assign performer_row = performer.mappableRows | default: performer %}
+        <tr>
+            <td class="rank-cell">{{ performer_row.rank }}</td>
+            <td class="name-cell">{{ performer_row.name }}</td>
+            <td class="score-cell">{{ performer_row.score }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Top Movers -->
+  <div class="top-movers-section">
+    <h2>TOP MOVERS</h2>
+    {{top_movers_html}}
+  </div>
+
+  <!-- Suggested Actions -->
+  <div class="suggested-actions-section">
+    <h2>SUGGESTED ACTIONS</h2>
+    {{suggested_actions_html}}
+  </div>
+
+  <!-- Team Breakdown -->
+  <div class="team-breakdown-section">
+    <h2>TEAM BREAKDOWN</h2>
+    <table class="team-table">
+      <thead>
+        <tr>
+          <th>Member</th>
+          <th>Live Classes</th>
+          <th>Lessons</th>
+          <th>Likes Given</th>
+          <th>Comments Rcv</th>
+          <th>Comments Made</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for member in team_members %}
+          {% assign member_row = member.mappableRows | default: member %}
+        <tr>
+            <td class="member-name">{{ member_row.member }}</td>
+            <td class="stat">{{ member_row.live_classes_attended }}</td>
+            <td class="stat">{{ member_row.lessons_completed }}</td>
+            <td class="stat">{{ member_row.likes_received }}</td>
+            <td class="stat">{{ member_row.comments_received }}</td>
+            <td class="stat">{{ member_row.comments_made }}</td>
+            <td class="total-score">{{ member_row.total_score }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-line">RealPars Analytics</div>
+    <div class="footer-line">Week {{ week_start_formatted }} - {{ week_end_formatted }}</div>
+  </div>
+</body>
+</html>
