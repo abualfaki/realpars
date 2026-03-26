@@ -54,4 +54,4 @@ dbt_internal_packages/
 
 
 # ignore dagster temp files
-*.temp_dagster_home_*
+.temp_dagster_home_*
