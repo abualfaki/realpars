@@ -51,3 +51,7 @@ logs/
 target/
 dbt_packages/
 dbt_internal_packages/
+
+
+# ignore dagster temp files
+*.temp_dagster_home_*
