@@ -54,9 +54,7 @@ models:
       
       # Team Member Information
       - name: member_community_id
-        description: Unique identifier for the team member
-        tests:
-          - not_null
+        description: Unique identifier for the team member (NULL for managers not yet joined)
           
       - name: member_email
         description: Team member's email address
