@@ -180,6 +180,9 @@ except Exception as e:
 
 # Airbyte Configuration
 try:
+    # Airbyte Cloud API URL
+    AIRBYTE_API_URL = os.getenv("AIRBYTE_API_URL", "https://api.airbyte.com/v1")
+    
     # OAuth2 Credentials (RECOMMENDED - more secure)
     AIRBYTE_CLIENT_ID = os.getenv("AIRBYTE_CLIENT_ID")
     AIRBYTE_CLIENT_SECRET = os.getenv("AIRBYTE_CLIENT_SECRET")
@@ -214,10 +217,13 @@ try:
     # Multiple Airbyte Connection IDs (one per data source/table)
     AIRBYTE_CONNECTION_IDS = {
         "community_members": os.getenv("AIRBYTE_CONNECTION_ID_COMMUNITY_MEMBERS_TABLES"),
-        "comments": os.getenv("AIRBYTE_CONNECTION_ID_COMMENTS_TABLE"),
-        "events": os.getenv("AIRBYTE_CONNECTION_ID_EVENTS_LIST_&_ATTENDEES_TABLES"),
+        "course_lessons_completed": os.getenv("AIRBYTE_CONNECTION_ID_COURSE_LESSONS_COMPLETED_TABLE"),
+        "course_completed": os.getenv("AIRBYTE_CONNECTION_ID_COURSE_COMPLETED_TABLE"),
+        "events": os.getenv("AIRBYTE_CONNECTION_ID_EVENTS_LISTS_AND_EVENTS_ATTENDEES"),
         "member_tags": os.getenv("AIRBYTE_CONNECTION_ID_MEMEBER_TAGS_TABLE"),
-        "posts": os.getenv("AIRBYTE_CONNECTION_ID_POSTS_TABLE"),
+        "post_comments": os.getenv("AIRBYTE_CONNECTION_ID_POST_COMMENTS_TABLE"),
+        "post_comment_liked": os.getenv("AIRBYTE_CONNECTION_ID_POST_COMMENTS_LIKED_TABLE"),
+        "post_liked": os.getenv("AIRBYTE_CONNECTION_ID_POST_LIKED_TABLE"),
     }
     
     # Log any missing connection IDs
@@ -232,12 +238,38 @@ try:
     # This makes it easy to know which table is populated by which Airbyte connection
     CONNECTION_TO_TABLE_MAP = {
         "community_members": ["community_members", "community_members_history"],
-        "comments": ["comments"],
-        "events": ["events_list", "events_attendees"],
-        "member_tags": ["member_tags"],
-        "posts": ["posts"],
+        "course_lessons_completed": ["course_lesson_completed"],
+        "course_completed": ["course_completed"],
+        "events": ["events_list", "event_attendees"],
+        "member_tags": ["member_tags_list"],
+        "post_comments": ["post_comment_created"],
+        "post_comment_liked": ["post_comment_liked"],
+        "post_liked": ["post_liked"],
     }
         
 except Exception as e:
     logger.error(f"❌ Error setting Airbyte configuration: {e}")
+    raise e
+
+
+# Make.com Configuration
+try:
+    MAKE_WEBHOOK_WEEKLY_REPORTS = os.getenv("MAKE_WEBHOOK_WEEKLY_REPORTS")
+    MAKE_WEBHOOK_MONTHLY_COURSE_COMPLETION = os.getenv("MAKE_WEBHOOK_MONTHLY_COURSE_COMPLETION")
+    
+    # Legacy single webhook URL (for backward compatibility)
+    MAKE_WEBHOOK_URL = MAKE_WEBHOOK_WEEKLY_REPORTS or os.getenv("MAKE_WEBHOOK_URL")
+    
+    if MAKE_WEBHOOK_WEEKLY_REPORTS is None:
+        logger.warning("⚠️ MAKE_WEBHOOK_WEEKLY_REPORTS not set. Weekly email automation will be skipped.")
+    else:
+        logger.info("✅ Make.com weekly reports webhook configured")
+    
+    if MAKE_WEBHOOK_MONTHLY_COURSE_COMPLETION is None:
+        logger.warning("⚠️ MAKE_WEBHOOK_MONTHLY_COURSE_COMPLETION not set. Monthly course completion emails will be skipped.")
+    else:
+        logger.info("✅ Make.com monthly course completion webhook configured")
+        
+except Exception as e:
+    logger.error(f"❌ Error setting Make.com configuration: {e}")
     raise e
