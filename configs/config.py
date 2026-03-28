@@ -205,10 +205,10 @@ try:
         logger.info("✅ Loaded Airbyte token from file")
     
     # Determine authentication method (matches priority in airbyte_factory.py)
-    if AIRBYTE_API_TOKEN:
-        logger.info("✅ Using Bearer token authentication")
-    elif AIRBYTE_CLIENT_ID and AIRBYTE_CLIENT_SECRET:
+    if AIRBYTE_CLIENT_ID and AIRBYTE_CLIENT_SECRET:
         logger.info("✅ Using OAuth2 authentication (Client ID/Secret)")
+    elif AIRBYTE_API_TOKEN:
+        logger.info("✅ Using Bearer token authentication")
     else:
         logger.warning("⚠️ No Airbyte authentication configured. Set either:")
         logger.warning("   - AIRBYTE_API_TOKEN (from Airbyte Cloud)")
@@ -216,11 +216,11 @@ try:
     
     # Multiple Airbyte Connection IDs (one per data source/table)
     AIRBYTE_CONNECTION_IDS = {
-        "community_members": os.getenv("AIRBYTE_CONNECTION_ID_COMMUNITY_MEMBERS_TABLES"),
+        "community_members": os.getenv("AIRBYTE_CONNECTION_ID_COMMUNITY_MEMBERS_TABLE"),
         "course_lessons_completed": os.getenv("AIRBYTE_CONNECTION_ID_COURSE_LESSONS_COMPLETED_TABLE"),
         "course_completed": os.getenv("AIRBYTE_CONNECTION_ID_COURSE_COMPLETED_TABLE"),
         "events": os.getenv("AIRBYTE_CONNECTION_ID_EVENTS_LISTS_AND_EVENTS_ATTENDEES"),
-        "member_tags": os.getenv("AIRBYTE_CONNECTION_ID_MEMEBER_TAGS_TABLE"),
+        "member_tags": os.getenv("AIRBYTE_CONNECTION_ID_MEMBER_TAGS_TABLE"),
         "post_comments": os.getenv("AIRBYTE_CONNECTION_ID_POST_COMMENTS_TABLE"),
         "post_comment_liked": os.getenv("AIRBYTE_CONNECTION_ID_POST_COMMENTS_LIKED_TABLE"),
         "post_liked": os.getenv("AIRBYTE_CONNECTION_ID_POST_LIKED_TABLE"),
