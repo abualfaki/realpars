@@ -1,0 +1,334 @@
+version: 7.10.0
+
+type: DeclarativeSource
+
+check:
+  type: CheckStream
+  stream_names:
+    - events_list
+
+definitions:
+  linked:
+    HttpRequester:
+      authenticator:
+        type: BearerAuthenticator
+        api_token: "{{ config[\"api_key\"] }}"
+    SimpleRetriever:
+      paginator:
+        type: DefaultPaginator
+        page_size_option:
+          type: RequestOption
+          field_name: per_page
+          inject_into: request_parameter
+        page_token_option:
+          type: RequestOption
+          field_name: page
+          inject_into: request_parameter
+        pagination_strategy:
+          type: PageIncrement
+          page_size: 100
+          start_from_page: 1
+          inject_on_first_request: true
+
+streams:
+  - type: DeclarativeStream
+    name: events_list
+    retriever:
+      type: SimpleRetriever
+      paginator:
+        $ref: "#/definitions/linked/SimpleRetriever/paginator"
+      requester:
+        type: HttpRequester
+        url: https://app.circle.so/api/admin/v2/events
+        http_method: GET
+        authenticator:
+          $ref: "#/definitions/linked/HttpRequester/authenticator"
+      record_selector:
+        type: RecordSelector
+        extractor:
+          type: DpathExtractor
+          field_path:
+            - records
+            - "*"
+    primary_key:
+      - id
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        type: object
+        $schema: http://json-schema.org/schema#
+        required:
+          - id
+        properties:
+          id:
+            type: number
+          url:
+            type:
+              - string
+              - "null"
+          body:
+            type:
+              - string
+              - "null"
+          host:
+            type:
+              - string
+              - "null"
+          name:
+            type:
+              - string
+              - "null"
+          slug:
+            type:
+              - string
+              - "null"
+          space:
+            type:
+              - object
+              - "null"
+            properties:
+              id:
+                type:
+                  - number
+                  - "null"
+              name:
+                type:
+                  - string
+                  - "null"
+              slug:
+                type:
+                  - string
+                  - "null"
+              community_id:
+                type:
+                  - number
+                  - "null"
+          topics:
+            type:
+              - array
+              - "null"
+            items:
+              type:
+                - number
+                - "null"
+          ends_at:
+            type:
+              - string
+              - "null"
+          user_id:
+            type:
+              - number
+              - "null"
+          starts_at:
+            type:
+              - string
+              - "null"
+          created_at:
+            type:
+              - string
+              - "null"
+          updated_at:
+            type:
+              - string
+              - "null"
+          likes_count:
+            type:
+              - number
+              - "null"
+          member_name:
+            type:
+              - string
+              - "null"
+          member_email:
+            type:
+              - string
+              - "null"
+          location_type:
+            type:
+              - string
+              - "null"
+          rsvp_disabled:
+            type:
+              - boolean
+              - "null"
+          comments_count:
+            type:
+              - number
+              - "null"
+          hide_attendees:
+            type:
+              - boolean
+              - "null"
+          hide_meta_info:
+            type:
+              - boolean
+              - "null"
+          cover_image_url:
+            type:
+              - string
+              - "null"
+          member_avatar_url:
+            type:
+              - string
+              - "null"
+          community_member_id:
+            type:
+              - number
+              - "null"
+          duration_in_seconds:
+            type:
+              - number
+              - "null"
+          send_email_reminder:
+            type:
+              - boolean
+              - "null"
+          zapier_display_title:
+            type:
+              - string
+              - "null"
+          send_email_confirmation:
+            type:
+              - boolean
+              - "null"
+          enable_custom_thank_you_message:
+            type:
+              - boolean
+              - "null"
+          hide_location_from_non_attendees:
+            type:
+              - boolean
+              - "null"
+          send_in_app_notification_reminder:
+            type:
+              - boolean
+              - "null"
+          send_in_app_notification_confirmation:
+            type:
+              - boolean
+              - "null"
+        additionalProperties: true
+  - type: DeclarativeStream
+    name: event_attendees
+    retriever:
+      type: SimpleRetriever
+      paginator:
+        $ref: "#/definitions/linked/SimpleRetriever/paginator"
+      requester:
+        type: HttpRequester
+        url: https://app.circle.so/api/admin/v2/event_attendees
+        http_method: GET
+        authenticator:
+          $ref: "#/definitions/linked/HttpRequester/authenticator"
+        request_parameters:
+          event_id: "{{ stream_partition.event_id }}"
+      record_selector:
+        type: RecordSelector
+        extractor:
+          type: DpathExtractor
+          field_path:
+            - records
+            - "*"
+      partition_router:
+        type: SubstreamPartitionRouter
+        parent_stream_configs:
+          - type: ParentStreamConfig
+            stream:
+              $ref: "#/streams/0"
+            parent_key: id
+            partition_field: event_id
+    primary_key:
+      - id
+    schema_loader:
+      type: InlineSchemaLoader
+      schema:
+        type: object
+        $schema: http://json-schema.org/schema#
+        required:
+          - id
+        properties:
+          id:
+            type: number
+          event_id:
+            type:
+              - number
+              - "null"
+          headline:
+            type:
+              - string
+              - "null"
+          rsvp_date:
+            type:
+              - string
+              - "null"
+          contact_id:
+            type:
+              - number
+              - "null"
+          event_name:
+            type:
+              - string
+              - "null"
+          member_name:
+            type:
+              - string
+              - "null"
+          rsvp_status:
+            type:
+              - string
+              - "null"
+          contact_type:
+            type:
+              - string
+              - "null"
+          member_email:
+            type:
+              - string
+              - "null"
+          member_avatar_url:
+            type:
+              - string
+              - "null"
+          community_member_id:
+            type:
+              - number
+              - "null"
+        additionalProperties: true
+
+spec:
+  type: Spec
+  connection_specification:
+    type: object
+    $schema: http://json-schema.org/draft-07/schema#
+    required:
+      - api_key
+    properties:
+      api_key:
+        type: string
+        description: Circle.so Admin API v2 Key
+        order: 0
+        title: API Key
+        airbyte_secret: true
+    additionalProperties: true
+
+metadata:
+  testedStreams:
+    events_list:
+      isStale: false
+      hasRecords: true
+      streamHash: 06ceeaaaf98c4f99e6b553c685b824d4005be39b
+      hasResponse: true
+      primaryKeysAreUnique: true
+      primaryKeysArePresent: true
+      responsesAreSuccessful: true
+    event_attendees:
+      isStale: false
+      hasRecords: true
+      streamHash: 431b0a7843fa0aa235ee37bdeb5b74408b19b75d
+      hasResponse: true
+      primaryKeysAreUnique: true
+      primaryKeysArePresent: true
+      responsesAreSuccessful: true
+  autoImportSchema:
+    events_list: false
+    event_attendees: false
