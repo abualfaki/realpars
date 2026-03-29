@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "realpars_analytics_pipeline"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "dagster>=1.7.0",
+    "dagster-airbyte>=0.23.0",
+    "dagster-dbt>=0.23.0",
+    "dagster-gcp>=0.23.0",
+    "dagster-cloud",
+    "dbt-bigquery>=1.0.0",
+    "requests>=2.31.0",
+    "python-dotenv>=1.0.0",
+    "google-cloud-bigquery>=3.11.0",
+    "google-cloud-storage>=2.10.0",
+    "pandas>=2.0.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["dagster_project*", "configs*"]
+
+[tool.dagster]
+module_name = "dagster_project.definitions"
