@@ -2,7 +2,8 @@
     config(
         materialized='view',
         schema='cc_stg_clean',
-        tags=['staging', 'comments']
+        tags=['staging', 'comments'],
+        enabled=false
     )
 }}
 
