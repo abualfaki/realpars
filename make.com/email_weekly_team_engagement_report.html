@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>RealPars Weekly Team Snapshot</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      font-family: Helvetica, Arial, sans-serif;
+      color: #1a1a1a;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    table {
+      border-spacing: 0;
+      border-collapse: collapse;
+    }
+
+    .wrapper {
+      width: 100%;
+      table-layout: fixed;
+      background-color: #ffffff;
+      padding: 0;
+    }
+
+    .main {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+    }
+
+    .logo-row {
+      padding: 30px 32px 20px 32px;
+    }
+
+    .logo-text {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #1a1a1a;
+      font-style: italic;
+    }
+
+    .content {
+      padding: 0 32px 32px 32px;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .greeting {
+      color: rgb(7, 16, 49);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.4;
+      letter-spacing: 0px;
+      text-align: left;
+      text-transform: none;
+      font-style: normal;
+      margin: 0 0 1.5em 0;
+      padding-top: 36px;
+    }
+
+    .intro {
+      margin: 0 0 24px 0;
+      color: rgb(7, 16, 49);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.4;
+      letter-spacing: 0px;
+      text-align: left;
+      text-transform: none;
+      font-style: normal;
+    }
+
+    .section {
+      margin: 0 0 28px 0;
+    }
+
+    .section-title {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin: 0 0 14px 0;
+      padding: 0;
+    }
+
+    .section-body {
+      padding: 0;
+      font-size: 14px;
+      color: #333333;
+      line-height: 1.7;
+    }
+
+    .item-list {
+      margin: 0;
+      padding: 0 0 0 20px;
+    }
+
+    .item-list li {
+      margin: 0 0 10px 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      color: rgb(7, 16, 49);
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #e8e8e8;
+      margin: 24px 0;
+    }
+
+    .footnote {
+      margin: 0 0 8px 0;
+      color: #666666;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .helper-note {
+      margin: 8px 0 0 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #6b7280;
+    }
+
+    .meta {
+      margin-top: 16px;
+      border-top: 1px solid #e8e8e8;
+      padding-top: 16px;
+      font-size: 12px;
+      color: #999999;
+      letter-spacing: 0.3px;
+    }
+
+    .pdf-button-wrap {
+      margin: 44px 0 28px 0;
+      text-align: center;
+    }
+
+    .pdf-button {
+      display: inline-block;
+      background-color: #1a1a1a;
+      color: #ffffff !important;
+      text-decoration: none;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 17px;
+      font-weight: 500;
+      padding: 21px 36px;
+      border-radius: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    .pdf-button:hover {
+      background-color: #333333;
+    }
+
+    @media screen and (max-width: 640px) {
+      .content {
+        padding: 0 20px 24px 20px;
+      }
+
+      .logo-row {
+        padding: 24px 20px 16px 20px;
+      }
+
+      .greeting {
+        font-size: 15px;
+      }
+
+      .section-title {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <table role="presentation" class="wrapper" width="100%">
+    <tr>
+      <td align="center">
+        <table role="presentation" class="main" width="600">
+          <tr>
+            <td class="logo-row" align="center"> <img src="https://storage.googleapis.com/project01-business-members-weekly-reporting/email-assets/RealPars-logo.png" width="224" style="display:block; border:0; margin:0 auto;">
+            </td>
+          </tr>
+          <tr>
+            <td class="content">
+              <p class="greeting">Hello {{9.manager_full_name}},</p>
+              <p class="intro">Here is a quick snapshot of your team engagement this week.</p>
+
+              <hr class="divider">
+
+              <div class="section">
+                <p class="section-title">Top Performers</p>
+                <div class="section-body">
+                  <ul class="item-list">
+                   <li>{{if(98.array[].mappableRows[1].score > 0; "🥇 <strong>" + 98.array[].mappableRows[1].name + "</strong> — " + 98.array[].mappableRows[1].score + " pts"; "🥇 <strong>" + 98.array[].mappableRows[1].name + "</strong> — 0 points this week")}}</li>
+                    {{if(length(98.array[].mappableRows[2].name) > 0; "<li>" + if(98.array[].mappableRows[2].score > 0; "🥈 <strong>" + 98.array[].mappableRows[2].name + "</strong> — " + 98.array[].mappableRows[2].score + " pts"; "🥈 <strong>" + 98.array[].mappableRows[2].name + "</strong> — 0 points this week") + "</li>"; "")}}
+                    {{if(length(98.array[].mappableRows[3].name) > 0; "<li>" + if(98.array[].mappableRows[3].score > 0; "🥉 <strong>" + 98.array[].mappableRows[3].name + "</strong> — " + 98.array[].mappableRows[3].score + " pts"; "🥉 <strong>" + 98.array[].mappableRows[3].name + "</strong> — 0 points this week") + "</li>"; "")}}
+                  </ul>
+                </div>
+              </div>
+
+              <hr class="divider">
+
+              <div class="section">
+                <p class="section-title">Top Movers</p>
+                <div class="section-body">
+                  <ul class="item-list">
+                    {{131.array[].mappableRows[].top_movers_html}}
+                  </ul>
+<p class="helper-note">Top Movers means people who got more points than last week. If no one got more points, we show "No top movers this week."</p>
+                </div>
+              </div>
+
+
+              <hr class="divider">
+
+              <div class="section">
+                <p class="section-title">Action Points</p>
+                <div class="section-body">
+                  <ul class="item-list">
+                    {{132.array[].mappableRows[].action_points_html}}
+                  </ul>
+                </div>
+              </div>
+
+              <div class="pdf-button-wrap">
+                <a href="{{204.preview_url}}" class="pdf-button" target="_blank">View Full Report</a>
+              </div>
+
+              <hr class="divider">
+
+              <p class="footnote">
+                Scores reflect participation across live classes, lessons, learning time, comments, and likes received.
+                Designed to reward both consistent leaders and weekly improvement.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
