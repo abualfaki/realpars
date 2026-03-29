@@ -7,9 +7,6 @@ sources:
     schema: "{{ env_var('BQ_RAW_DATASET') }}"
 
     tables:
-      - name: comments
-        description: "Raw comments data made by circle community members"
-
       - name: community_members
         description: "All mcommunity members in the RealPars Circle Community"
 
