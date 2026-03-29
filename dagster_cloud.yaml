@@ -1,0 +1,7 @@
+locations:
+  - location_name: realpars_community
+    code_source:
+      python_file: dagster_project/definitions.py
+    build:
+      directory: ./
+      registry: # Set after connecting to Dagster Cloud
