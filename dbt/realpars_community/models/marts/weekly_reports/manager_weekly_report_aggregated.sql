@@ -26,7 +26,7 @@ manager_team_data AS (
         
         -- Team member details as a struct
         STRUCT(
-            CONCAT(wer.member_first_name, ' ', wer.member_last_name) as member_name,
+            TRIM(CONCAT(COALESCE(wer.member_first_name, ''), ' ', COALESCE(wer.member_last_name, ''))) as member_name,
             wer.member_email,
             wer.member_community_id,
             wer.classes_attended,
