@@ -7,8 +7,8 @@ This module defines Dagster assets that trigger Make.com webhooks for:
 
 The Make.com workflows:
 - Query BigQuery for manager and team data
-- Generate PDF reports with engagement/course completion metrics
-- Send personalized emails to each manager based on html email templates
+- Generate PDF reports with engagement/completion metrics
+- Send personalized emails to each manager
 """
 
 import requests
