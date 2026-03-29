@@ -78,17 +78,24 @@ try:
     
     if GOOGLE_APPLICATION_CREDENTIALS is None:
         logger.warning("⚠️ Environment variable GOOGLE_APPLICATION_CREDENTIALS not set. Make sure to set it in the .env file or github secrets")
+    elif GOOGLE_APPLICATION_CREDENTIALS.strip().startswith('{'):
+        # JSON content provided directly (e.g. Dagster Cloud env var) — write to temp file
+        import tempfile
+        tmp_creds = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+        tmp_creds.write(GOOGLE_APPLICATION_CREDENTIALS)
+        tmp_creds.close()
+        GOOGLE_APPLICATION_CREDENTIALS = tmp_creds.name
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = GOOGLE_APPLICATION_CREDENTIALS
+        logger.info(f"✅ Google credentials written to temp file: {GOOGLE_APPLICATION_CREDENTIALS}")
     else:
-        # Convert relative path to absolute path if needed
+        # File path provided (local development)
         if not GOOGLE_APPLICATION_CREDENTIALS.startswith('/'):
             GOOGLE_APPLICATION_CREDENTIALS = str(project_root / GOOGLE_APPLICATION_CREDENTIALS)
             logger.info(f"✅ Converted credentials path to absolute: {GOOGLE_APPLICATION_CREDENTIALS}")
         
-        # Verify the file exists
         if not os.path.exists(GOOGLE_APPLICATION_CREDENTIALS):
             logger.error(f"❌ Google credentials file not found at: {GOOGLE_APPLICATION_CREDENTIALS}")
         else:
-            # Set it as actual environment variable so BigQuery client can find it
             os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = GOOGLE_APPLICATION_CREDENTIALS
             logger.info(f"✅ Google credentials file found and set: {GOOGLE_APPLICATION_CREDENTIALS}")
             
