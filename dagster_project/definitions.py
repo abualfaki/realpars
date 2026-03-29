@@ -59,8 +59,8 @@ monthly_course_completion_schedule = ScheduleDefinition(
 daily_refresh_schedule = ScheduleDefinition(
     name="weekly_data_refresh",
     job=airbyte_sync_job,
-    cron_schedule="0 23 * * 4",  # Thursday 11 PM UTC = Friday midnight CET
-    description="Sync Circle.so data every Friday at midnight EU time",
+    cron_schedule="0 23 * * 0",  # Sunday 11 PM UTC = Monday midnight CET
+    description="Sync Circle.so data every Monday at midnight EU time",
 )
 
 # Main Dagster definitions
