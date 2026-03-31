@@ -320,3 +320,61 @@ models:
 
       - name: report_generated_at
         description: Timestamp when the row was generated
+
+  - name: report_delivery_log
+    description: |
+      Log of all report emails sent to managers via Make.com.
+      Make.com inserts a row into this table after each email is sent.
+      
+      **Dataset:** cc_make_com_weekly_reports
+      
+      **Populated by:** Make.com BigQuery INSERT after each email send
+      **Purpose:** Track whether each manager received their report
+      
+    columns:
+      - name: delivery_id
+        description: Unique identifier for each delivery record (UUID)
+        tests:
+          - unique
+          - not_null
+
+      - name: manager_email
+        description: Email address of the manager who received the report
+        tests:
+          - not_null
+
+      - name: manager_full_name
+        description: Manager's full name
+
+      - name: business_name
+        description: Business/company associated with the manager
+
+      - name: report_type
+        description: Type of report sent ('weekly' or 'monthly')
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['weekly', 'monthly']
+
+      - name: week_start_date
+        description: The reporting week's start date (matches manager_email_list_makecom)
+        tests:
+          - not_null
+
+      - name: sent_at
+        description: Timestamp when Make.com sent the email
+        tests:
+          - not_null
+
+      - name: delivery_status
+        description: Status of the delivery ('sent', 'failed', 'bounced')
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['sent', 'failed', 'bounced']
+
+      - name: make_scenario_id
+        description: Make.com scenario ID for traceability
+
+      - name: make_execution_id
+        description: Make.com execution ID for traceability
