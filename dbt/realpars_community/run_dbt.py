@@ -73,7 +73,8 @@ def main():
         sys.exit(1)
 
     # Build dbt command from arguments
-    dbt_command = ['dbt'] + sys.argv[1:] + ['--profiles-dir', str(Path(__file__).parent)]
+    dbt_project_dir = Path(__file__).parent
+    dbt_command = ['dbt'] + sys.argv[1:] + ['--project-dir', str(dbt_project_dir), '--profiles-dir', str(dbt_project_dir)]
     
     print(f"🚀 Running: {' '.join(dbt_command)}")
     print()
