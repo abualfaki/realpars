@@ -16,14 +16,22 @@ from dagster_dbt import DbtCliResource
 import subprocess
 import logging
 
+from dagster_project.assets.airbyte_assets import airbyte_assets as _airbyte_asset_defs
+
 logger = logging.getLogger(__name__)
 
 # Path to dbt project (relative to this file)
 DBT_PROJECT_DIR = Path(__file__).parent.parent.parent / "dbt" / "realpars_community"
 
+# Collect all Airbyte asset keys so dbt waits for all syncs to complete
+_airbyte_dep_keys = []
+for _asset_def in _airbyte_asset_defs:
+    _airbyte_dep_keys.extend(_asset_def.keys)
+
 
 @asset(
     name="realpars_dbt_models",
+    deps=_airbyte_dep_keys,
     description="Run all dbt models to transform Circle.so data",
     group_name="dbt_transformations",
 )
