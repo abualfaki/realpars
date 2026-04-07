@@ -127,6 +127,55 @@ Cron expressions are in UTC; the pipeline is designed for EU (CET) business hour
 
 ---
 
+## dbt Model Dependency Graph
+
+```
+Sources (BigQuery Raw — cc_raw_*)
+└── Staging (cc_stg_clean)
+    ├── clean_communtity_members_table
+    ├── clean_events_attendees_table
+    ├── clean_course_lesson_completed_table
+    ├── clean_post_liked_table
+    ├── clean_post_comments_table
+    └── clean_post_comment_liked_table
+        │
+        ▼
+Intermediate (cc_intermediate_transformations)
+    ├── int_weekly_live_classes_attended
+    ├── int_weekly_lessons_completed
+    ├── int_weekly_likes_received
+    ├── int_weekly_comments_received
+    └── int_weekly_comments_made
+        └──────────────────────────────────────────────────┐
+                                                           ▼
+                                          int_weekly_member_engagement_incremental
+                                                           │
+Business Relationships (cc_stg_business_relationships)     │
+    └── business_relationships ────────────────────────┐   │
+                                                       ▼   ▼
+Marts (cc_stg_weekly_reports)              weekly_team_engagement_report
+                                                        │
+          ┌─────────────────────────────────────────────┼──────────────────────────┐
+          ▼                                             ▼                          ▼
+manager_weekly_team_detail_report  manager_weekly_report_aggregated  manager_email_report_with_rankings
+          │                                             │                          │
+          └─────────────────────────────────────────────┴──────────────────────────┘
+                                                        ▼
+                                    Make.com Export Models (cc_make_com_weekly_reports)
+                                        ├── manager_email_list_makecom
+                                        ├── manager_email_top_performers_makecom
+                                        ├── manager_email_top_movers_makecom
+                                        ├── manager_email_action_points_makecom
+                                        ├── manager_team_detail_pdf_makecom
+                                        ├── manager_pdf_movers_actions_makecom
+                                        ├── summary_pdf
+                                        └── report_delivery_log
+```
+
+`weekly_team_engagement_report` is the central hub — all downstream models read from it. It filters to the **last completed week** (`week_start_date < DATE_TRUNC(CURRENT_DATE(), WEEK(MONDAY))`) so reports always reflect the previous Monday–Sunday period.
+
+---
+
 ## Project Structure
 
 ```
