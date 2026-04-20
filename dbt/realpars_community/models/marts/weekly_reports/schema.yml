@@ -354,7 +354,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['weekly', 'monthly']
+              arguments:
+                values: ['weekly', 'monthly']
 
       - name: week_start_date
         description: The reporting week's start date (matches manager_email_list_makecom)
@@ -371,7 +372,8 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['sent', 'failed', 'bounced']
+              arguments:
+                values: ['sent', 'failed', 'bounced']
 
       - name: make_scenario_id
         description: Make.com scenario ID for traceability
