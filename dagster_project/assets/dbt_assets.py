@@ -34,20 +34,27 @@ def _validate_dbt_environment(context: AssetExecutionContext) -> None:
     """Validate the env vars dbt needs before spawning the subprocess."""
     from configs import config
 
-    env_values = {
+    required_env_values = {
         "PROJECT_ID": config.PROJECT_ID,
         "BQ_RAW_DATASET": config.BQ_RAW_DATASET,
+        "GOOGLE_APPLICATION_CREDENTIALS": config.GOOGLE_APPLICATION_CREDENTIALS,
+    }
+
+    optional_env_values = {
         "BQ_STG_CLEAN_DATASET": config.BQ_STG_CLEAN_DATASET,
         "BQ_STG_BUSINESS_RELATIONSHIPS_DATASET": config.BQ_STG_BUSINESS_RELATIONSHIPS_DATASET,
         "BQ_STG_WEEKLY_REPORTS_DATASET": config.BQ_STG_WEEKLY_REPORTS_DATASET,
         "BQ_STG_TRANSFORMED_DATASET": config.BQ_STG_TRANSFORMED_DATASET,
-        "GOOGLE_APPLICATION_CREDENTIALS": config.GOOGLE_APPLICATION_CREDENTIALS,
     }
 
-    missing_vars = [name for name, value in env_values.items() if not value]
-    for name, value in env_values.items():
+    missing_vars = [name for name, value in required_env_values.items() if not value]
+    for name, value in required_env_values.items():
         status = "set" if value else "missing"
-        context.log.info(f"dbt env check: {name}={status}")
+        context.log.info(f"dbt env check: required {name}={status}")
+
+    for name, value in optional_env_values.items():
+        status = "set" if value else "missing"
+        context.log.info(f"dbt env check: optional {name}={status}")
 
     if missing_vars:
         missing_vars_str = ", ".join(missing_vars)
@@ -56,7 +63,7 @@ def _validate_dbt_environment(context: AssetExecutionContext) -> None:
             "In Dagster Cloud branch deployments, ensure these vars are configured for the deployment."
         )
 
-    credentials_path = Path(str(env_values["GOOGLE_APPLICATION_CREDENTIALS"]))
+    credentials_path = Path(str(required_env_values["GOOGLE_APPLICATION_CREDENTIALS"]))
     if not credentials_path.exists():
         raise Exception(
             "dbt environment validation failed. "
