@@ -43,6 +43,10 @@ with community_members as (
         user_profile_created_at
     from {{ source('cc_stg_clean', 'clean_communtity_members_table') }}
     where community_member_id is not null
+    qualify row_number() over (
+        partition by community_member_id
+        order by user_profile_created_at desc, email desc, first_name desc, last_name desc
+    ) = 1
 ),
 
 {% if is_incremental() %}
