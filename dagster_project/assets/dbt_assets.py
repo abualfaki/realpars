@@ -11,6 +11,7 @@ The dbt project includes:
 """
 
 from pathlib import Path
+import sys
 from dagster import AssetExecutionContext, asset, Output
 from dagster_dbt import DbtCliResource
 import subprocess
@@ -27,6 +28,49 @@ DBT_PROJECT_DIR = Path(__file__).parent.parent.parent / "dbt" / "realpars_commun
 _airbyte_dep_keys = []
 for _asset_def in _airbyte_asset_defs:
     _airbyte_dep_keys.extend(_asset_def.keys)
+
+
+def _validate_dbt_environment(context: AssetExecutionContext) -> None:
+    """Validate the env vars dbt needs before spawning the subprocess."""
+    from configs import config
+
+    required_env_values = {
+        "PROJECT_ID": config.PROJECT_ID,
+        "BQ_RAW_DATASET": config.BQ_RAW_DATASET,
+        "GOOGLE_APPLICATION_CREDENTIALS": config.GOOGLE_APPLICATION_CREDENTIALS,
+    }
+
+    optional_env_values = {
+        "BQ_STG_CLEAN_DATASET": config.BQ_STG_CLEAN_DATASET,
+        "BQ_STG_BUSINESS_RELATIONSHIPS_DATASET": config.BQ_STG_BUSINESS_RELATIONSHIPS_DATASET,
+        "BQ_STG_WEEKLY_REPORTS_DATASET": config.BQ_STG_WEEKLY_REPORTS_DATASET,
+        "BQ_STG_TRANSFORMED_DATASET": config.BQ_STG_TRANSFORMED_DATASET,
+    }
+
+    missing_vars = [name for name, value in required_env_values.items() if not value]
+    for name, value in required_env_values.items():
+        status = "set" if value else "missing"
+        context.log.info(f"dbt env check: required {name}={status}")
+
+    for name, value in optional_env_values.items():
+        status = "set" if value else "missing"
+        context.log.info(f"dbt env check: optional {name}={status}")
+
+    if missing_vars:
+        missing_vars_str = ", ".join(missing_vars)
+        raise Exception(
+            f"dbt environment validation failed. Missing required env vars: {missing_vars_str}. "
+            "In Dagster Cloud branch deployments, ensure these vars are configured for the deployment."
+        )
+
+    credentials_path = Path(str(required_env_values["GOOGLE_APPLICATION_CREDENTIALS"]))
+    if not credentials_path.exists():
+        raise Exception(
+            "dbt environment validation failed. "
+            f"GOOGLE_APPLICATION_CREDENTIALS points to a file that does not exist: {credentials_path}"
+        )
+
+    context.log.info(f"dbt env check: credentials_path={credentials_path}")
 
 
 @asset(
@@ -48,13 +92,15 @@ def realpars_dbt_models(context: AssetExecutionContext) -> Output:
     """
     context.log.info("Starting dbt build process...")
     context.log.info(f"dbt project directory: {DBT_PROJECT_DIR}")
+    context.log.info(f"Dagster Python executable: {sys.executable}")
+    _validate_dbt_environment(context)
     
     # Run dbt wrapper script (which loads .env and runs dbt)
     run_dbt_script = DBT_PROJECT_DIR / "run_dbt.py"
     
     try:
         result = subprocess.run(
-            ["python3", str(run_dbt_script), "build"],
+            [sys.executable, str(run_dbt_script), "build"],
             cwd=str(DBT_PROJECT_DIR),  # Run from dbt project directory
             capture_output=True,
             text=True,
