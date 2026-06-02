@@ -10,6 +10,7 @@ from dagster import Failure
 from dagster_airbyte import AirbyteCloudResource
 from dagster_airbyte.translator import AirbyteJobStatusType
 from dagster_airbyte.types import AirbyteOutput
+from requests import RequestException
 
 from configs.config import (
     AIRBYTE_CLIENT_ID,
@@ -34,20 +35,33 @@ class ResilientAirbyteCloudResource(AirbyteCloudResource):
             "accept": "application/json",
             **self.all_additional_request_params.get("headers", {}),
         }
-        params: dict[str, Any] = {"connectionId": connection_id, "limit": 100}
+        params: dict[str, Any] = {"connectionId": connection_id, "limit": 25}
         if self.workspace_id:
             params["workspaceIds"] = self.workspace_id
 
-        response = requests.get(
-            f"{self.api_base_url}/jobs",
-            headers=headers,
-            params=params,
-            timeout=self.request_timeout,
-        )
-        response.raise_for_status()
+        num_retries = 0
+        while True:
+            try:
+                response = requests.get(
+                    f"{self.api_base_url}/jobs",
+                    headers=headers,
+                    params=params,
+                    timeout=max(self.request_timeout, 30),
+                )
+                response.raise_for_status()
 
-        payload = response.json()
-        return payload.get("data", [])
+                payload = response.json()
+                return payload.get("data", [])
+            except RequestException as error:
+                self._log.warning(
+                    "Unable to list Airbyte jobs for connection_id=%s: %s",
+                    connection_id,
+                    error,
+                )
+                if num_retries == self.request_max_retries:
+                    return []
+                num_retries += 1
+                time.sleep(self.request_retry_delay)
 
     def _get_existing_running_job(self, connection_id: str) -> Mapping[str, object] | None:
         jobs = self._list_jobs_for_connection(connection_id)
