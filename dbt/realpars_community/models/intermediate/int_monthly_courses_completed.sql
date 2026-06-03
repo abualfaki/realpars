@@ -22,14 +22,17 @@ with base_completions as (
         course_id,
         course_name,
         created_at as completed_at,
-        DATE_TRUNC(created_at, MONTH) as month_start_date
+        DATE_TRUNC(DATE(created_at), MONTH) as month_start_date
     from {{ source('cc_stg_clean', 'clean_courses_completed_table') }}
     where initiator_community_id is not null
         and created_at is not null
         and course_id is not null
         {% if is_incremental() %}
-        -- Only process completions from recent months
-        and DATE_TRUNC(created_at, MONTH) >= (select MAX(month_start_date) from {{ this }})
+        -- Reprocess recent months so late-arriving completions update existing aggregates.
+        and DATE_TRUNC(DATE(created_at), MONTH) >= coalesce(
+            (select DATE_SUB(DATE(MAX(month_start_date)), INTERVAL 1 MONTH) from {{ this }}),
+            DATE '1970-01-01'
+        )
         {% endif %}
 ),
 

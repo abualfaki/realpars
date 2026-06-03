@@ -22,17 +22,16 @@ with event_attendees as (
         event_id,
         rsvp_date,
         rsvp_status,
-        DATE_TRUNC(rsvp_date, WEEK(MONDAY)) as week_start_date
+        DATE_TRUNC(DATE(rsvp_date), WEEK(MONDAY)) as week_start_date
     from {{ source('cc_stg_clean', 'clean_events_attendees_table') }}
     where rsvp_status = 'yes'  -- Only count confirmed attendees
         and community_member_id is not null
         and rsvp_date is not null
         {% if is_incremental() %}
-        -- Only process events from weeks with new RSVPs since last run
-        and DATE_TRUNC(rsvp_date, WEEK(MONDAY)) >= (
-            select DATE_TRUNC(MAX(rsvp_date), WEEK(MONDAY)) 
-            from {{ source('cc_stg_clean', 'clean_events_attendees_table') }}
-            where rsvp_date <= (select MAX(week_start_date) from {{ this }})
+        -- Reprocess recent weeks so late-arriving RSVPs update existing aggregates.
+        and DATE_TRUNC(DATE(rsvp_date), WEEK(MONDAY)) >= coalesce(
+            (select DATE_SUB(DATE(MAX(week_start_date)), INTERVAL 4 WEEK) from {{ this }}),
+            DATE '1970-01-05'
         )
         {% endif %}
 ),

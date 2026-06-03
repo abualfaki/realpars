@@ -22,17 +22,16 @@ with post_likes_received as (
     select
         post_owner_community_member_id as community_member_id,
         created_at,
-        DATE_TRUNC(created_at, WEEK(MONDAY)) as week_start_date,
+        DATE_TRUNC(DATE(created_at), WEEK(MONDAY)) as week_start_date,
         record_id as like_id
     from {{ source('cc_stg_clean', 'clean_post_liked_table') }}
     where post_owner_community_member_id is not null
         and created_at is not null
         {% if is_incremental() %}
-        -- Only process likes from weeks with new likes since last run
-        and DATE_TRUNC(created_at, WEEK(MONDAY)) >= (
-            select DATE_TRUNC(MAX(created_at), WEEK(MONDAY)) 
-            from {{ source('cc_stg_clean', 'clean_post_liked_table') }}
-            where created_at <= (select MAX(week_start_date) from {{ this }})
+        -- Reprocess recent weeks so late-arriving likes update existing aggregates.
+        and DATE_TRUNC(DATE(created_at), WEEK(MONDAY)) >= coalesce(
+            (select DATE_SUB(DATE(MAX(week_start_date)), INTERVAL 4 WEEK) from {{ this }}),
+            DATE '1970-01-05'
         )
         {% endif %}
 ),
@@ -41,17 +40,16 @@ comment_likes_received as (
     select
         comment_community_member_id as community_member_id,
         created_at,
-        DATE_TRUNC(created_at, WEEK(MONDAY)) as week_start_date,
+        DATE_TRUNC(DATE(created_at), WEEK(MONDAY)) as week_start_date,
         record_id as like_id
     from {{ source('cc_stg_clean', 'clean_post_comment_liked_table') }}
     where comment_community_member_id is not null
         and created_at is not null
         {% if is_incremental() %}
-        -- Only process likes from weeks with new likes since last run
-        and DATE_TRUNC(created_at, WEEK(MONDAY)) >= (
-            select DATE_TRUNC(MAX(created_at), WEEK(MONDAY)) 
-            from {{ source('cc_stg_clean', 'clean_post_comment_liked_table') }}
-            where created_at <= (select MAX(week_start_date) from {{ this }})
+        -- Reprocess recent weeks so late-arriving likes update existing aggregates.
+        and DATE_TRUNC(DATE(created_at), WEEK(MONDAY)) >= coalesce(
+            (select DATE_SUB(DATE(MAX(week_start_date)), INTERVAL 4 WEEK) from {{ this }}),
+            DATE '1970-01-05'
         )
         {% endif %}
 ),

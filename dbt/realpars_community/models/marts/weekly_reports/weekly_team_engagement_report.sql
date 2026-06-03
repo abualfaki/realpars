@@ -69,8 +69,8 @@ business_mapping AS (
 ),
 
 latest_week AS (
-    -- Get the latest COMPLETED week from engagement data
-    -- Exclude the current (in-progress) week so reports always show the last full week
+    -- Get the latest COMPLETED week from engagement data.
+    -- Exclude the current (in-progress) week so reports always show the last full week.
     SELECT 
         MAX(week_start_date) as week_start_date,
         MAX(week_end_date) as week_end_date
