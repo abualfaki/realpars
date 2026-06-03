@@ -56,7 +56,7 @@ member_weeks as (
     from community_members m
     cross join all_weeks w
     -- Only include weeks after member profile was created
-    where w.week_start_date >= DATE_TRUNC(m.user_profile_created_at, WEEK(MONDAY))
+    where w.week_start_date >= DATE(DATE_TRUNC(m.user_profile_created_at, WEEK(MONDAY)))
 ),
 
 -- Join all metric tables
