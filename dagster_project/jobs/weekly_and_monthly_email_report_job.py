@@ -39,7 +39,7 @@ airbyte_and_dbt_refresh_job = define_asset_job(
 airbyte_sync_job = define_asset_job(
     name="airbyte_sync_only",
     description="Run only Airbyte syncs to refresh raw data",
-    selection=AssetSelection.groups("airbyte"),  # Only Airbyte assets
+    selection=AssetSelection.groups("airbyte_to_bigquery_sync"),
 )
 
 dbt_transform_job = define_asset_job(

@@ -22,17 +22,16 @@ with comments_received as (
         post_owner_community_member_id as community_member_id,
         comment_id,
         created_at as commented_at,
-        DATE_TRUNC(created_at, WEEK(MONDAY)) as week_start_date
+        DATE_TRUNC(DATE(created_at), WEEK(MONDAY)) as week_start_date
     from {{ source('cc_stg_clean', 'clean_post_comments_table') }}
     where post_owner_community_member_id is not null
         and created_at is not null
         and comment_id is not null
         {% if is_incremental() %}
-        -- Only process comments from weeks with new comments since last run
-        and DATE_TRUNC(created_at, WEEK(MONDAY)) >= (
-            select DATE_TRUNC(MAX(created_at), WEEK(MONDAY)) 
-            from {{ source('cc_stg_clean', 'clean_post_comments_table') }}
-            where created_at <= (select MAX(week_start_date) from {{ this }})
+        -- Reprocess recent weeks so late-arriving comments update existing aggregates.
+        and DATE_TRUNC(DATE(created_at), WEEK(MONDAY)) >= coalesce(
+            (select DATE_SUB(DATE(MAX(week_start_date)), INTERVAL 4 WEEK) from {{ this }}),
+            DATE '1970-01-05'
         )
         {% endif %}
 ),

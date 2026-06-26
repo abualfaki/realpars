@@ -10,9 +10,11 @@ WITH source AS (
     FROM {{ source('raw_cc_data', 'post_comment_created') }}
 
     {% if is_incremental() %}
-        -- Only new raw rows since last successful build of this model
-        WHERE safe_cast(created_at AS timestamp) > 
-            (SELECT MAX(safe_cast(created_at AS timestamp)) from {{ this }})
+        -- Reprocess a small extraction lookback so late-arriving events still flow downstream.
+        WHERE safe_cast(_airbyte_extracted_at AS timestamp) >= TIMESTAMP_SUB(
+            COALESCE((SELECT MAX(_airbyte_extracted_at) FROM {{ this }}), TIMESTAMP('1970-01-01')),
+            INTERVAL 1 DAY
+        )
     {% endif %}
 ),
 

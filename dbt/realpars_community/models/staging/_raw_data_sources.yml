@@ -10,7 +10,7 @@ sources:
       - name: community_members
         description: "All mcommunity members in the RealPars Circle Community"
 
-      - name: courses_completed
+      - name: course_completed
         description: "List of completed courses by members in the RealPars Circle Community"
 
       - name: course_lesson_completed

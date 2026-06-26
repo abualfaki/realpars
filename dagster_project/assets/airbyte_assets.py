@@ -32,6 +32,7 @@ CONNECTION_TABLE_MAP = {
     "course_completed": ["course_completed"],
     "events": ["events_list", "event_attendees"],
     "member_tags": ["member_tags_list"],
+    "posts": ["posts"],
     "post_comments": ["post_comment_created"],
     "post_comment_liked": ["post_comment_liked"],
     "post_liked": ["post_liked"],

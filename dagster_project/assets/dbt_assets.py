@@ -119,6 +119,9 @@ def realpars_dbt_models(context: AssetExecutionContext) -> Output:
                     context.log.warning(f"[stderr] {line}")
         
         if result.returncode != 0:
+            stdout_lines = [line for line in result.stdout.splitlines() if line.strip()]
+            stderr_lines = [line for line in result.stderr.splitlines() if line.strip()]
+            failure_hint = stderr_lines[-1] if stderr_lines else (stdout_lines[-1] if stdout_lines else "No dbt output captured.")
             context.log.error(f"❌ dbt build failed with return code {result.returncode}")
             context.log.error("=" * 80)
             context.log.error("Full stdout output:")
@@ -127,7 +130,10 @@ def realpars_dbt_models(context: AssetExecutionContext) -> Output:
             context.log.error("Full stderr output:")
             context.log.error(result.stderr if result.stderr else "(no stderr)")
             context.log.error("=" * 80)
-            raise Exception(f"dbt build failed with return code {result.returncode}. Check logs above for details.")
+            raise Exception(
+                f"dbt build failed with return code {result.returncode}. "
+                f"Most relevant dbt output: {failure_hint}"
+            )
         
         context.log.info("✓ dbt build completed successfully")
         

@@ -23,17 +23,16 @@ with lesson_completions as (
         initiator_community_id as community_member_id,
         lesson_id,
         created_at as completed_at,
-        DATE_TRUNC(created_at, WEEK(MONDAY)) as week_start_date
+        DATE_TRUNC(DATE(created_at), WEEK(MONDAY)) as week_start_date
     from {{ source('cc_stg_clean', 'clean_course_lesson_completed_table') }}
     where initiator_community_id is not null
         and created_at is not null
         and lesson_id is not null
         {% if is_incremental() %}
-        -- Only process lessons from weeks with new completions since last run
-        and DATE_TRUNC(created_at, WEEK(MONDAY)) >= (
-            select DATE_TRUNC(MAX(created_at), WEEK(MONDAY)) 
-            from {{ source('cc_stg_clean', 'clean_course_lesson_completed_table') }}
-            where created_at <= (select MAX(week_start_date) from {{ this }})
+        -- Reprocess recent weeks so late-arriving completions update existing aggregates.
+        and DATE_TRUNC(DATE(created_at), WEEK(MONDAY)) >= coalesce(
+            (select DATE_SUB(DATE(MAX(week_start_date)), INTERVAL 4 WEEK) from {{ this }}),
+            DATE '1970-01-05'
         )
         {% endif %}
 ),
