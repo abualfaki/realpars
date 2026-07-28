@@ -78,6 +78,26 @@ team_members_with_completion_dates as (
     from non_manager_team_members as nmtm
     left join member_course_completion_dates as mccd
         on nmtm.member_community_id = mccd.member_community_id
+),
+
+business_relationships_refresh as (
+    select max(transformed_at) as transformed_at
+    from {{ ref('business_relationships') }}
+),
+
+course_completions_refresh as (
+    select max(_airbyte_extracted_at) as extracted_at
+    from {{ source('cc_stg_clean', 'clean_courses_completed_table') }}
+),
+
+model_refresh_metadata as (
+    select
+        greatest(
+            brr.transformed_at,
+            ccr.extracted_at
+        ) as last_transformed_at
+    from business_relationships_refresh as brr
+    cross join course_completions_refresh as ccr
 )
 
 select
@@ -88,8 +108,10 @@ select
     coalesce(course_name, 'No Completions') as course_name,
     coalesce(format_date('%Y-%m-%d', course_completed_date), 'No Completions') as course_completed_date,
     coalesce(format_date('%Y-%m-%d', completion_month), 'No Completions') as completion_month,
-    coalesce(format_date('%B %Y', completion_month), 'No Completions') as completion_month_formatted
+    coalesce(format_date('%B %Y', completion_month), 'No Completions') as completion_month_formatted,
+    mrm.last_transformed_at
 from team_members_with_completion_dates
+cross join model_refresh_metadata as mrm
 order by
     business_name,
     member_full_name,

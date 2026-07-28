@@ -72,6 +72,9 @@ models:
       - name: completion_month_formatted
         description: Human-readable month label derived from the completion month; displays "No Completions" when no completion exists
 
+      - name: last_transformed_at
+        description: Latest upstream transformation or extraction timestamp across the business relationship and course completion inputs
+
   - name: team_member_weekly_activity
     description: |
       Thin BI-facing projection of manager_weekly_team_detail_report_all_weeks.

@@ -50,3 +50,12 @@ models:
 
       - name: weeks_of_inactivity
         description: Number of consecutive completed weeks, including the current week, where the business had zero team points
+
+      - name: inactivity_bucket_weeks
+        description: Week-based inactivity band derived from weeks_of_inactivity
+
+      - name: inactivity_bucket_months
+        description: Month-equivalent inactivity band derived from weeks_of_inactivity
+
+      - name: last_transformed_at
+        description: Latest upstream transformation timestamp across the business relationship and weekly engagement inputs

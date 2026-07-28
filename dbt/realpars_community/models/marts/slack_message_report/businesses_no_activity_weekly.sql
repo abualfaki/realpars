@@ -142,6 +142,26 @@ inactivity_streaks as (
       and active_weeks_seen_from_latest = 0
     group by
         business_name
+),
+
+business_relationships_refresh as (
+    select max(transformed_at) as transformed_at
+    from {{ ref('business_relationships') }}
+),
+
+weekly_engagement_refresh as (
+    select max(dbt_updated_at) as dbt_updated_at
+    from {{ ref('int_weekly_member_engagement_incremental') }}
+),
+
+model_refresh_metadata as (
+    select
+        greatest(
+            brr.transformed_at,
+            wer.dbt_updated_at
+        ) as last_transformed_at
+    from business_relationships_refresh as brr
+    cross join weekly_engagement_refresh as wer
 )
 
 select
@@ -158,10 +178,24 @@ select
     coalesce(lbna.previous_week_live_classes_attended, 0) as previous_week_live_classes_attended,
     coalesce(lbna.previous_week_lessons_completed, 0) as previous_week_lessons_completed,
     lbna.team_points_change,
-    coalesce(streak.weeks_of_inactivity, 1) as weeks_of_inactivity
+    coalesce(streak.weeks_of_inactivity, 1) as weeks_of_inactivity,
+    case
+        when coalesce(streak.weeks_of_inactivity, 1) >= 24 then '24+ weeks inactive'
+        when coalesce(streak.weeks_of_inactivity, 1) >= 12 then '12-23 weeks inactive'
+        when coalesce(streak.weeks_of_inactivity, 1) >= 4 then '4-11 weeks inactive'
+        else 'Under 4 weeks inactive'
+    end as inactivity_bucket_weeks,
+    case
+        when coalesce(streak.weeks_of_inactivity, 1) >= 24 then '6+ months inactive'
+        when coalesce(streak.weeks_of_inactivity, 1) >= 12 then '3-6 months inactive'
+        when coalesce(streak.weeks_of_inactivity, 1) >= 4 then '1-3 months inactive'
+        else 'Under 1 month inactive'
+    end as inactivity_bucket_months,
+    mrm.last_transformed_at
 from latest_business_no_activity as lbna
 left join manager_lists as ml
     on lbna.business_name = ml.business_name
 left join inactivity_streaks as streak
     on lbna.business_name = streak.business_name
+cross join model_refresh_metadata as mrm
 order by weeks_of_inactivity desc

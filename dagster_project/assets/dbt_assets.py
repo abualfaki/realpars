@@ -73,6 +73,73 @@ def _validate_dbt_environment(context: AssetExecutionContext) -> None:
     context.log.info(f"dbt env check: credentials_path={credentials_path}")
 
 
+def _run_dbt_command(
+    context: AssetExecutionContext,
+    *dbt_args: str,
+    description: str,
+) -> Output:
+    """Run the dbt wrapper with the provided args and return a Dagster output."""
+    context.log.info(description)
+    context.log.info(f"dbt project directory: {DBT_PROJECT_DIR}")
+    context.log.info(f"Dagster Python executable: {sys.executable}")
+    _validate_dbt_environment(context)
+
+    run_dbt_script = DBT_PROJECT_DIR / "run_dbt.py"
+
+    try:
+        result = subprocess.run(
+            [sys.executable, str(run_dbt_script), *dbt_args],
+            cwd=str(DBT_PROJECT_DIR),
+            capture_output=True,
+            text=True,
+            timeout=1800,
+        )
+
+        if result.stdout:
+            for line in result.stdout.split('\n'):
+                if line.strip():
+                    context.log.info(line)
+
+        if result.stderr:
+            for line in result.stderr.split('\n'):
+                if line.strip() and not line.startswith('✅') and not line.startswith('⚠️'):
+                    context.log.warning(f"[stderr] {line}")
+
+        if result.returncode != 0:
+            stdout_lines = [line for line in result.stdout.splitlines() if line.strip()]
+            stderr_lines = [line for line in result.stderr.splitlines() if line.strip()]
+            failure_hint = stderr_lines[-1] if stderr_lines else (stdout_lines[-1] if stdout_lines else "No dbt output captured.")
+            context.log.error(f"❌ dbt command failed with return code {result.returncode}")
+            context.log.error("=" * 80)
+            context.log.error("Full stdout output:")
+            context.log.error(result.stdout if result.stdout else "(no stdout)")
+            context.log.error("=" * 80)
+            context.log.error("Full stderr output:")
+            context.log.error(result.stderr if result.stderr else "(no stderr)")
+            context.log.error("=" * 80)
+            raise Exception(
+                f"dbt command failed with return code {result.returncode}. "
+                f"Most relevant dbt output: {failure_hint}"
+            )
+
+        context.log.info("✓ dbt command completed successfully")
+
+        return Output(
+            value={"status": "success", "return_code": result.returncode},
+            metadata={
+                "dbt_project": str(DBT_PROJECT_DIR),
+                "command": " ".join(("dbt", *dbt_args)),
+            },
+        )
+
+    except subprocess.TimeoutExpired:
+        context.log.error("dbt command timed out after 30 minutes")
+        raise
+    except Exception as e:
+        context.log.error(f"Failed to run dbt: {e}")
+        raise
+
+
 @asset(
     name="realpars_dbt_models",
     deps=_airbyte_dep_keys,
@@ -90,64 +157,56 @@ def realpars_dbt_models(context: AssetExecutionContext) -> Output:
     2. Intermediate: Calculate engagement metrics (int_*)
     3. Marts: Build business reports for Make.com
     """
-    context.log.info("Starting dbt build process...")
-    context.log.info(f"dbt project directory: {DBT_PROJECT_DIR}")
-    context.log.info(f"Dagster Python executable: {sys.executable}")
-    _validate_dbt_environment(context)
-    
-    # Run dbt wrapper script (which loads .env and runs dbt)
-    run_dbt_script = DBT_PROJECT_DIR / "run_dbt.py"
-    
-    try:
-        result = subprocess.run(
-            [sys.executable, str(run_dbt_script), "build"],
-            cwd=str(DBT_PROJECT_DIR),  # Run from dbt project directory
-            capture_output=True,
-            text=True,
-            timeout=1800,  # 30 minute timeout
-        )
-        
-        # Log dbt output (both stdout and stderr)
-        if result.stdout:
-            for line in result.stdout.split('\n'):
-                if line.strip():
-                    context.log.info(line)
-        
-        if result.stderr:
-            for line in result.stderr.split('\n'):
-                if line.strip() and not line.startswith('✅') and not line.startswith('⚠️'):
-                    context.log.warning(f"[stderr] {line}")
-        
-        if result.returncode != 0:
-            stdout_lines = [line for line in result.stdout.splitlines() if line.strip()]
-            stderr_lines = [line for line in result.stderr.splitlines() if line.strip()]
-            failure_hint = stderr_lines[-1] if stderr_lines else (stdout_lines[-1] if stdout_lines else "No dbt output captured.")
-            context.log.error(f"❌ dbt build failed with return code {result.returncode}")
-            context.log.error("=" * 80)
-            context.log.error("Full stdout output:")
-            context.log.error(result.stdout if result.stdout else "(no stdout)")
-            context.log.error("=" * 80)
-            context.log.error("Full stderr output:")
-            context.log.error(result.stderr if result.stderr else "(no stderr)")
-            context.log.error("=" * 80)
-            raise Exception(
-                f"dbt build failed with return code {result.returncode}. "
-                f"Most relevant dbt output: {failure_hint}"
-            )
-        
-        context.log.info("✓ dbt build completed successfully")
-        
-        return Output(
-            value={"status": "success", "return_code": result.returncode},
-            metadata={
-                "dbt_project": str(DBT_PROJECT_DIR),
-                "command": "dbt build",
-            }
-        )
-        
-    except subprocess.TimeoutExpired:
-        context.log.error("dbt build timed out after 30 minutes")
-        raise
-    except Exception as e:
-        context.log.error(f"Failed to run dbt: {e}")
-        raise
+    return _run_dbt_command(
+        context,
+        "build",
+        description="Starting dbt build process...",
+    )
+
+
+@asset(
+    name="team_member_course_completion_dates_bi_report",
+    deps=["realpars_dbt_models"],
+    description="Build the BI report model for team member course completion dates.",
+    group_name="bi_reporting",
+)
+def team_member_course_completion_dates_bi_report(context: AssetExecutionContext) -> Output:
+    return _run_dbt_command(
+        context,
+        "build",
+        "--select",
+        "models/marts/bi_reports/team_member_course_completion_dates.sql",
+        description="Building the BI course completion detail report model...",
+    )
+
+
+@asset(
+    name="team_member_weekly_activity_bi_report",
+    deps=["realpars_dbt_models"],
+    description="Build the BI report model for team member weekly activity.",
+    group_name="bi_reporting",
+)
+def team_member_weekly_activity_bi_report(context: AssetExecutionContext) -> Output:
+    return _run_dbt_command(
+        context,
+        "build",
+        "--select",
+        "models/marts/bi_reports/team_member_weekly_activity.sql",
+        description="Building the BI weekly activity report model...",
+    )
+
+
+@asset(
+    name="slack_message_report_models",
+    deps=["realpars_dbt_models"],
+    description="Build the Slack message reporting models used by automation.",
+    group_name="slack_message_automation",
+)
+def slack_message_report_models(context: AssetExecutionContext) -> Output:
+    return _run_dbt_command(
+        context,
+        "build",
+        "--select",
+        "models/marts/slack_message_report/businesses_no_activity_weekly.sql",
+        description="Building the Slack message inactivity report model...",
+    )
