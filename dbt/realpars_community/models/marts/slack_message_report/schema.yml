@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: businesses_no_activity_weekly
+    description: |
+      Slack-facing weekly report for businesses with no team activity in the latest completed week.
+
+      The model is built at business grain so each business appears once.
+      A business is included when its current week's total team points are zero.
+      Consecutive inactivity weeks are calculated from historical weekly member engagement.
+    columns:
+      - name: business_name
+        description: Business name with no recorded activity this week
+
+      - name: manager_names
+        description: Up to 3 manager full names, alphabetically ordered and comma-separated
+
+      - name: manager_emails
+        description: Up to 3 manager email addresses, alphabetically ordered and comma-separated
+
+      - name: week_start_date
+        description: Start date of the latest completed reporting week
+
+      - name: week_end_date
+        description: End date of the latest completed reporting week
+
+      - name: team_size
+        description: Total number of team members mapped to the business
+
+      - name: active_members
+        description: Count of team members with activity in the current week
+
+      - name: inactive_members
+        description: Count of team members with no activity in the current week
+
+      - name: current_week_points
+        description: Current week's total team points; always zero for rows in this model
+
+      - name: previous_week_points
+        description: Previous week's total team points derived from current points and weekly points change
+
+      - name: previous_week_live_classes_attended
+        description: Previous week's total live classes attended across the business team
+
+      - name: previous_week_lessons_completed
+        description: Previous week's total lessons completed across the business team
+
+      - name: team_points_change
+        description: Change in team points versus the previous week
+
+      - name: weeks_of_inactivity
+        description: Number of consecutive completed weeks, including the current week, where the business had zero team points
+
+      - name: inactivity_bucket_weeks
+        description: Week-based inactivity band derived from weeks_of_inactivity
+
+      - name: inactivity_bucket_months
+        description: Month-equivalent inactivity band derived from weeks_of_inactivity
+
+      - name: last_transformed_at
+        description: Latest upstream transformation timestamp across the business relationship and weekly engagement inputs

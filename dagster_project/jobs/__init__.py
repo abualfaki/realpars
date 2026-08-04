@@ -1,29 +1,31 @@
 """
 Jobs Module
 
-Contains all Dagster job definitions:
-- weekly_report_job: Complete weekly pipeline
-- monthly_course_completion_job: Complete monthly pipeline
-- airbyte_sync_job: Data sync only
-- dbt_transform_job: Transformation only
-- email_trigger_weekly_job: Weekly email trigger only
-- email_trigger_monthly_job: Monthly email trigger only
+Contains all Dagster job definitions for pipeline, BI reporting, and automation runs.
 """
 
-from .weekly_and_monthly_email_report_job import (
+from .bi_reporting import (
     weekly_report_job,
     monthly_course_completion_job,
+    airbyte_and_dbt_refresh_job,
     airbyte_sync_job,
     dbt_transform_job,
     email_trigger_weekly_job,
     email_trigger_monthly_job,
+    bi_reporting_weekly_job,
+    bi_reporting_monthly_job,
+    slack_message_job,
 )
 
 __all__ = [
     "weekly_report_job",
     "monthly_course_completion_job",
+    "airbyte_and_dbt_refresh_job",
     "airbyte_sync_job",
     "dbt_transform_job",
     "email_trigger_weekly_job",
     "email_trigger_monthly_job",
+    "bi_reporting_weekly_job",
+    "bi_reporting_monthly_job",
+    "slack_message_job",
 ]

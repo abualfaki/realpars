@@ -63,6 +63,7 @@ managers AS (
         AND s.business_tag_id IN UNNEST(m.tag_ids)
 ),
 
+
 community_manager_business_assignments AS (
     -- Map managers to their business names using tag IDs
     SELECT
@@ -87,6 +88,7 @@ community_manager_business_assignments AS (
         -- Manager has this business tag ID
         CAST(b.tag_id AS INT64) IN UNNEST(m.manager_tag_ids)
 ),
+
 
 invited_manager_business_assignments AS (
     -- Map invited/non-profile-complete managers from client CSV to known business names.

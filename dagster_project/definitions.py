@@ -20,13 +20,16 @@ import logging
 from dagster_project.assets import airbyte_assets, dbt_assets, make_dot_com_trigger
 from dagster_project.resources.airbyte_resources import airbyte_resource
 from dagster_project.resources.dbt_resource import dbt_resource
-from dagster_project.jobs.weekly_and_monthly_email_report_job import (
+from dagster_project.jobs.bi_reporting import (
     weekly_report_job,
     monthly_course_completion_job,
     airbyte_sync_job,
     dbt_transform_job,
     email_trigger_weekly_job,
     email_trigger_monthly_job,
+    bi_reporting_weekly_job,
+    bi_reporting_monthly_job,
+    slack_message_job,
 )
 
 logger = logging.getLogger(__name__)
@@ -35,8 +38,12 @@ logger = logging.getLogger(__name__)
 all_assets = [
     *airbyte_assets.airbyte_assets,  # Airbyte sync assets (Circle.so → BigQuery)
     dbt_assets.realpars_dbt_models,   # dbt transformation asset (Raw → Analytics)
+    dbt_assets.team_member_course_completion_dates_bi_report,
+    dbt_assets.team_member_weekly_activity_bi_report,
+    dbt_assets.slack_message_report_models,
     make_dot_com_trigger.trigger_make_weekly_reports,  # Weekly email trigger
     make_dot_com_trigger.trigger_make_monthly_course_completion,  # Monthly email trigger
+    make_dot_com_trigger.trigger_make_weekly_business_inactivity_report,
 ]
 
 # Schedule 1: Weekly report pipeline - Monday 8 AM EU time (7 AM UTC)
@@ -73,6 +80,9 @@ defs = Definitions(
         dbt_transform_job,
         email_trigger_weekly_job,
         email_trigger_monthly_job,
+        bi_reporting_weekly_job,
+        bi_reporting_monthly_job,
+        slack_message_job,
     ],
     schedules=[
         weekly_report_schedule,
@@ -87,5 +97,5 @@ defs = Definitions(
 
 logger.info("✓ Dagster definitions loaded successfully")
 logger.info(f"  - {len(all_assets)} assets")
-logger.info(f"  - 6 jobs (2 pipelines, 4 components)")
+logger.info(f"  - 9 jobs (2 pipelines, 7 components)")
 logger.info(f"  - 3 schedules (weekly, monthly, daily)")

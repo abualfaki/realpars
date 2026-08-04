@@ -195,6 +195,20 @@ models:
     description: |
       Base weekly engagement data combining member activity with business relationships.
       Source table for manager reports.
+
+  - name: weekly_team_engagement_report_all_weeks
+    description: |
+      Historical weekly engagement data combining member activity with business relationships
+      across all completed reporting weeks.
+    columns:
+      - name: member_full_name
+        description: Team member full name computed once from member_first_name and member_last_name
+
+      - name: report_week
+        description: Combined reporting week label built from week_start_date and week_end_date
+
+      - name: community_interaction
+        description: Sum of likes_received, comments_received, and comments_made for the reporting week
     
   - name: manager_weekly_report_aggregated
     description: |
@@ -267,6 +281,19 @@ models:
         
       - name: team_total_engagement
         description: Sum of all team engagement this week
+
+  - name: manager_weekly_team_detail_report_all_weeks
+    description: |
+      Historical version of manager_weekly_team_detail_report with one row per
+      manager, team member, and completed reporting week.
+
+      Keeps the same engagement and week-over-week columns for BI trend analysis.
+    columns:
+      - name: report_week
+        description: Combined reporting week label built from week_start_date and week_end_date
+
+      - name: community_interaction
+        description: Sum of likes_received, comments_received, and comments_made for the reporting week
 
   - name: manager_email_monthly_courses_completed_makecom
     description: |

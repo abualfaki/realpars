@@ -21,6 +21,8 @@ from configs.config import MAKE_WEBHOOK_WEEKLY_REPORTS, MAKE_WEBHOOK_MONTHLY_COU
 
 logger = logging.getLogger(__name__)
 
+SLACK_MESSAGE_AUTOMATION_WEBHOOK = "https://hook.eu2.make.com/bbthmdj6p9imh5dcmwcc6kkc6yipfpdq"
+
 
 @asset(
     name="trigger_make_weekly_reports",
@@ -181,4 +183,56 @@ def trigger_make_monthly_course_completion(context: AssetExecutionContext) -> Di
         
     except Exception as e:
         context.log.error(f"❌ Failed to trigger Make.com webhook: {e}")
+        raise
+
+
+@asset(
+    name="trigger_make_weekly_business_inactivity_report",
+    deps=["slack_message_report_models"],
+    description="Trigger Make.com webhook to send weekly business inactivity reports via slack (Monday 8 AM EU time)",
+    group_name="slack_message_automation",
+)
+def trigger_make_weekly_business_inactivity_report(context: AssetExecutionContext) -> Dict[str, Any]:
+    """Trigger Make.com workflow to send the weekly Slack inactivity report."""
+
+    context.log.info("Triggering Make.com Slack message automation workflow...")
+    context.log.info(f"Webhook URL: {SLACK_MESSAGE_AUTOMATION_WEBHOOK[:50]}...")
+
+    try:
+        response = requests.post(
+            SLACK_MESSAGE_AUTOMATION_WEBHOOK,
+            timeout=30,
+        )
+
+        response.raise_for_status()
+
+        context.log.info(f"✓ Make.com Slack automation triggered successfully: HTTP {response.status_code}")
+
+        response_data = None
+        if response.text:
+            try:
+                response_data = response.json()
+                context.log.info(f"Response: {response_data}")
+            except Exception:
+                context.log.info(f"Response text: {response.text[:200]}")
+
+        return {
+            "status": "success",
+            "status_code": response.status_code,
+            "response": response_data,
+            "timestamp": datetime.now().isoformat(),
+            "report_type": "weekly_business_inactivity_slack",
+        }
+
+    except requests.exceptions.Timeout:
+        context.log.error("❌ Make.com Slack webhook request timed out after 30 seconds")
+        raise
+
+    except requests.exceptions.HTTPError as e:
+        context.log.error(f"❌ Make.com Slack webhook returned error: {e}")
+        context.log.error(f"Response: {e.response.text if e.response else 'No response'}")
+        raise
+
+    except Exception as e:
+        context.log.error(f"❌ Failed to trigger Make.com Slack webhook: {e}")
         raise

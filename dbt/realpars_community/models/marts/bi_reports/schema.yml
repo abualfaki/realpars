@@ -1,0 +1,116 @@
+version: 2
+
+models:
+  - name: monthly_course_completion
+    description: |
+      Monthly course completions by team member.
+
+      One row per team member and month with a plain-text list of courses completed.
+    columns:
+      - name: manager_email
+        description: Manager email associated with the team member
+
+      - name: manager_full_name
+        description: Full name of the manager
+
+      - name: business_name
+        description: Business name associated with the team member
+
+      - name: member_community_id
+        description: Unique identifier for the team member
+
+      - name: member_full_name
+        description: Team member full name
+
+      - name: completion_month
+        description: First day of the reporting month
+
+      - name: completion_month_formatted
+        description: Human-readable month label
+
+      - name: completed_courses_count
+        description: Number of distinct courses completed by the member in the month
+
+      - name: number_of_courses_completed
+        description: Alias of completed_courses_count retained for downstream compatibility
+
+      - name: completed_courses
+        description: Comma-separated list of completed courses or "No course completions"
+
+      - name: report_generated_at
+        description: Timestamp when the row was generated
+
+  - name: team_member_course_completion_dates
+    description: |
+      Team member course completion detail report with one row per member, course, and completion date.
+
+      Team members with no recorded course completions are still included, and the completion fields display "No Completions".
+    columns:
+      - name: business_name
+        description: Business name associated with the team member
+
+      - name: member_community_id
+        description: Unique identifier for the team member
+        tests:
+          - not_null
+
+      - name: member_full_name
+        description: Team member full name
+
+      - name: manager_emails
+        description: Comma-separated list of manager email addresses associated with the team member
+
+      - name: course_name
+        description: Name of the completed course; displays "No Completions" when no completion exists
+
+      - name: course_completed_date
+        description: Exact date when the member completed a course as YYYY-MM-DD text; displays "No Completions" when no completion exists
+
+      - name: completion_month
+        description: First day of the completion month as YYYY-MM-DD text; displays "No Completions" when no completion exists
+
+      - name: completion_month_formatted
+        description: Human-readable month label derived from the completion month; displays "No Completions" when no completion exists
+
+      - name: last_transformed_at
+        description: Latest upstream transformation or extraction timestamp across the business relationship and course completion inputs
+
+  - name: team_member_weekly_activity
+    description: |
+      Thin BI-facing projection of manager_weekly_team_detail_report_all_weeks.
+
+      Keeps a direct dependency on the historical weekly detail report while exposing only the
+      team member activity fields needed for BI consumption.
+    columns:
+      - name: team_member_name
+        description: Team member display name copied from the upstream weekly detail report
+
+      - name: live_classes_attended
+        description: Number of live classes attended during the reporting week
+
+      - name: lessons_completed
+        description: Number of lessons completed during the reporting week
+
+      - name: comments_made
+        description: Number of comments made during the reporting week
+
+      - name: comments_received
+        description: Number of comments received during the reporting week
+
+      - name: likes_received
+        description: Number of likes received during the reporting week
+
+      - name: total_points_this_week
+        description: Total activity points for the reporting week, sourced from the upstream weekly engagement total
+
+      - name: week_start_date
+        description: Start date of the reporting week
+
+      - name: week_end_date
+        description: End date of the reporting week
+
+      - name: report_week
+        description: Combined reporting week label built from week_start_date and week_end_date
+
+      - name: business_name
+        description: Business name associated with the team member
