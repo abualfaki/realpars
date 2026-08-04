@@ -135,4 +135,4 @@ final as (
         on b.community_member_id = t.community_member_id
 )
 
-select * from final where email = 'garyb@abgint.com'
+select * from final
