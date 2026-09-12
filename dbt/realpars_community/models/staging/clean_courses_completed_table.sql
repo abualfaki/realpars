@@ -1,7 +1,7 @@
 {{ config(
     materialized = 'incremental',
     incremental_strategy = 'merge',
-    unique_key = ['initiator_email', 'course_id'],
+    unique_key = ['initiator_community_id', 'course_id'],
     on_schema_change = 'sync_all_columns'
 )}}
 
@@ -11,9 +11,20 @@ WITH source AS (
 
     {% if is_incremental() %}
         -- Reprocess a small extraction lookback so late-arriving events still flow downstream.
-        WHERE safe_cast(_airbyte_extracted_at AS timestamp) >= TIMESTAMP_SUB(
-            COALESCE((SELECT MAX(_airbyte_extracted_at) FROM {{ this }}), TIMESTAMP('1970-01-01')),
-            INTERVAL 1 DAY
+        WHERE safe_cast(created_at AS timestamp) >= TIMESTAMP_SUB(
+            COALESCE((SELECT MAX(created_at) FROM {{ this }}), TIMESTAMP('1970-01-01')),
+
+
+            -- We using a 45 day lookback window because the documentation is unclear
+            -- about the logic of creating values for created_at and triggered_at
+            -- when a course.completed event is back populated. Futhermore, in the documentation 
+            -- there are no  examples of circumstnacesthat will require the need 
+            -- to back populate data.
+
+            -- Since the Data in circle_community_raw_datsets.course_completed is 
+            -- updated monthly. A 45 Day lookback window is reasonable to catch potentially
+            -- backfilled events.
+            INTERVAL 45 DAY
         )
     {% endif %}
 ),
@@ -85,7 +96,10 @@ deduped_clean_base_data as (
     FROM clean_base_data
     QUALIFY ROW_NUMBER()
     OVER (
-        PARTITION BY initiator_email, course_id
+
+        -- We aren't using record_id here because if a course is repeated multiple times we won't
+        -- be able to tell because record_id is unique for all course completions
+        PARTITION BY initiator_community_id, course_id -- better to use community_member_id because an emails can change.
         ORDER BY created_at ASC
     ) = 1
 )
