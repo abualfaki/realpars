@@ -223,7 +223,7 @@ The pipeline requires environment variables for each integration:
 - **Airbyte** — `AIRBYTE_CLIENT_ID`, `AIRBYTE_CLIENT_SECRET`, `AIRBYTE_CONNECTION_IDS`
 - **Google Cloud** — `GOOGLE_APPLICATION_CREDENTIALS`, `PROJECT_ID`, `ACTIVE_ENVIRONMENT` (`prod`/`dev`)
 - **BigQuery** — Dataset names for raw, staging, intermediate, and mart schemas
-- **Make.com** — `MAKE_WEBHOOK_WEEKLY_REPORTS`, `MAKE_WEBHOOK_MONTHLY_COURSE_COMPLETION`
+- **Make.com** — `MAKE_WEBHOOK_WEEKLY_REPORTS`, `MAKE_WEBHOOK_MONTHLY_COURSE_COMPLETION`, `MAKE_WEBHOOK_SLACK_MESSAGE_AUTOMATION`
 - **Circle.so** — API tokens for data and admin APIs
 
 See [`dagster_project/QUICK_START.md`](dagster_project/QUICK_START.md) for setup instructions.

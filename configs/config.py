@@ -265,6 +265,7 @@ except Exception as e:
 try:
     MAKE_WEBHOOK_WEEKLY_REPORTS = os.getenv("MAKE_WEBHOOK_WEEKLY_REPORTS")
     MAKE_WEBHOOK_MONTHLY_COURSE_COMPLETION = os.getenv("MAKE_WEBHOOK_MONTHLY_COURSE_COMPLETION")
+    MAKE_WEBHOOK_SLACK_MESSAGE_AUTOMATION = os.getenv("MAKE_WEBHOOK_SLACK_MESSAGE_AUTOMATION") or os.getenv("SLACK_MESSAGE_AUTOMATION_WEBHOOK")
     
     # Legacy single webhook URL (for backward compatibility)
     MAKE_WEBHOOK_URL = MAKE_WEBHOOK_WEEKLY_REPORTS or os.getenv("MAKE_WEBHOOK_URL")
@@ -278,6 +279,11 @@ try:
         logger.warning("⚠️ MAKE_WEBHOOK_MONTHLY_COURSE_COMPLETION not set. Monthly course completion emails will be skipped.")
     else:
         logger.info("✅ Make.com monthly course completion webhook configured")
+
+    if MAKE_WEBHOOK_SLACK_MESSAGE_AUTOMATION is None:
+        logger.warning("⚠️ MAKE_WEBHOOK_SLACK_MESSAGE_AUTOMATION not set. Slack message automation will be skipped.")
+    else:
+        logger.info("✅ Make.com Slack message automation webhook configured")
         
 except Exception as e:
     logger.error(f"❌ Error setting Make.com configuration: {e}")

@@ -11,9 +11,19 @@ WITH source AS (
 
     {% if is_incremental() %}
         -- Reprocess a small extraction lookback so late-arriving events still flow downstream.
-        WHERE safe_cast(_airbyte_extracted_at AS timestamp) >= TIMESTAMP_SUB(
-            COALESCE((SELECT MAX(_airbyte_extracted_at) FROM {{ this }}), TIMESTAMP('1970-01-01')),
-            INTERVAL 1 DAY
+        WHERE safe_cast(created_at AS timestamp) >= TIMESTAMP_SUB(
+            COALESCE((SELECT MAX(created_at) FROM {{ this }}), TIMESTAMP('1970-01-01')),
+
+            -- We using a 10 day lookback window because the documentation is unclear
+            -- about how the logic of creating values for created_at and triggered_at
+            -- when a course.lesson.completed event is back populated. Futhermore, in 
+            -- the documentationthere are no  examples of circumstnacesthat will require 
+            -- the need to back populate data.
+
+            -- Since the Data in circle_community_raw_datsets.post_comment is 
+            -- updated weekly. A 10 Day lookback window is reasonable to catch potentially
+            -- backfilled events.
+            INTERVAL 10 DAY
         )
     {% endif %}
 ),

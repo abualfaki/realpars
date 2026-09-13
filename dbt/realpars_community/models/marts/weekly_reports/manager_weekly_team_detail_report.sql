@@ -263,7 +263,7 @@ FROM team_member_detail tm
 INNER JOIN team_summary ts
     ON tm.manager_email = ts.manager_email
     AND tm.week_start_date = ts.week_start_date
-
+    
 -- Note: No ORDER BY due to BigQuery partition_by constraint
 -- Results are clustered by manager_email and week_start_date
 -- Add ORDER BY in your PDF generation query

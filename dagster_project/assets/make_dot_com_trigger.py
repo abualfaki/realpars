@@ -17,11 +17,13 @@ from typing import Dict, Any
 import logging
 from datetime import datetime
 
-from configs.config import MAKE_WEBHOOK_WEEKLY_REPORTS, MAKE_WEBHOOK_MONTHLY_COURSE_COMPLETION
+from configs.config import (
+    MAKE_WEBHOOK_WEEKLY_REPORTS,
+    MAKE_WEBHOOK_MONTHLY_COURSE_COMPLETION,
+    MAKE_WEBHOOK_SLACK_MESSAGE_AUTOMATION,
+)
 
 logger = logging.getLogger(__name__)
-
-SLACK_MESSAGE_AUTOMATION_WEBHOOK = "https://hook.eu2.make.com/bbthmdj6p9imh5dcmwcc6kkc6yipfpdq"
 
 
 @asset(
@@ -195,12 +197,19 @@ def trigger_make_monthly_course_completion(context: AssetExecutionContext) -> Di
 def trigger_make_weekly_business_inactivity_report(context: AssetExecutionContext) -> Dict[str, Any]:
     """Trigger Make.com workflow to send the weekly Slack inactivity report."""
 
+    if not MAKE_WEBHOOK_SLACK_MESSAGE_AUTOMATION:
+        context.log.warning("MAKE_WEBHOOK_SLACK_MESSAGE_AUTOMATION not configured, skipping Slack trigger")
+        return {
+            "status": "skipped",
+            "reason": "No Slack webhook URL configured"
+        }
+
     context.log.info("Triggering Make.com Slack message automation workflow...")
-    context.log.info(f"Webhook URL: {SLACK_MESSAGE_AUTOMATION_WEBHOOK[:50]}...")
+    context.log.info(f"Webhook URL: {MAKE_WEBHOOK_SLACK_MESSAGE_AUTOMATION[:50]}...")
 
     try:
         response = requests.post(
-            SLACK_MESSAGE_AUTOMATION_WEBHOOK,
+            MAKE_WEBHOOK_SLACK_MESSAGE_AUTOMATION,
             timeout=30,
         )
 

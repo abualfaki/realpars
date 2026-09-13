@@ -25,8 +25,10 @@ with post_likes_received as (
         DATE_TRUNC(DATE(created_at), WEEK(MONDAY)) as week_start_date,
         record_id as like_id
     from {{ source('cc_stg_clean', 'clean_post_liked_table') }}
+    
     where post_owner_community_member_id is not null
         and created_at is not null
+        
         {% if is_incremental() %}
         -- Reprocess recent weeks so late-arriving likes update existing aggregates.
         and DATE_TRUNC(DATE(created_at), WEEK(MONDAY)) >= coalesce(
@@ -43,6 +45,7 @@ comment_likes_received as (
         DATE_TRUNC(DATE(created_at), WEEK(MONDAY)) as week_start_date,
         record_id as like_id
     from {{ source('cc_stg_clean', 'clean_post_comment_liked_table') }}
+    
     where comment_community_member_id is not null
         and created_at is not null
         {% if is_incremental() %}
