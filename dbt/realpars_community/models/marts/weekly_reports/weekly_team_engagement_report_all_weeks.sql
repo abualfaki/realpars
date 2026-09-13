@@ -30,7 +30,7 @@ WITH team_member_engagement AS (
     FROM {{ ref('int_weekly_member_engagement_incremental') }} we
     WHERE we.community_member_id IS NOT NULL
       AND we.week_start_date IS NOT NULL
-      AND we.week_start_date < DATE_TRUNC(CURRENT_DATE(), WEEK(MONDAY))
+      AND we.week_start_date < DATE_TRUNC(CURRENT_DATE(), WEEK(MONDAY)) --Only include most recent week
 ),
 
 business_mapping AS (
@@ -109,5 +109,4 @@ final_output AS (
         AND te.week_start_date = cw.week_start_date
 )
 
-SELECT *
-FROM final_output
+SELECT * FROM final_output
