@@ -87,6 +87,8 @@ potential_business_tags AS (
             'partner',
             'checklist completed'
         )
+        -- Exclude tag names ae promotional offers e.g. "40% May off - Basic"
+        AND NOT REGEXP_CONTAINS(mt.tag_name, r'(?i)(^\d+%\s*[a-z]+\s*off\s*-?\s*|^clicked\s+on\s+[a-z]+\s+\d+%)')
         -- Exclude very long names (likely course titles)
         AND LENGTH(mt.tag_name) <= 100
 ),
