@@ -43,6 +43,8 @@ with community_members as (
         user_profile_created_at
     from {{ source('cc_stg_clean', 'clean_communtity_members_table') }}
     where community_member_id is not null
+    
+    -- DeDupe
     qualify row_number() over (
         partition by community_member_id
         order by user_profile_created_at desc, email desc, first_name desc, last_name desc
@@ -80,8 +82,10 @@ new_members as (
     left join existing_members em
         on cm.community_member_id = em.community_member_id
     cross join max_processed_week mpw
-    where em.community_member_id is null  -- Not in existing table
-       or DATE(DATE_TRUNC(cm.user_profile_created_at, WEEK(MONDAY))) >= DATE_SUB(mpw.max_week, INTERVAL 4 WEEK)  -- Joined recently
+    where em.community_member_id is null  -- Get oleder members who aren't part of new members
+
+    -- Joined recently (I feel we don't need this condition, Community member will never be null)
+       or DATE(DATE_TRUNC(cm.user_profile_created_at, WEEK(MONDAY))) >= DATE_SUB(mpw.max_week, INTERVAL 4 WEEK)  
 ),
 
 -- Generate date spine for NEW weeks (for incremental updates to existing members)
@@ -104,8 +108,8 @@ new_member_weeks_spine as (
         DATE(DATE_TRUNC(week_date, WEEK(MONDAY))) as week_start_date
     from UNNEST(
         GENERATE_DATE_ARRAY(
-            (select MIN(DATE(DATE_TRUNC(user_profile_created_at, WEEK(MONDAY)))) from new_members),
-            DATE(DATE_TRUNC(CURRENT_DATE(), WEEK(MONDAY))),
+            (select MIN(DATE(DATE_TRUNC(user_profile_created_at, WEEK(MONDAY)))) from new_members), --Get week they joined at
+            DATE(DATE_TRUNC(CURRENT_DATE(), WEEK(MONDAY))), -- Get current time. The time will be at the time this code is executed
             INTERVAL 1 WEEK
         )
     ) as week_date
@@ -120,7 +124,7 @@ new_member_weeks as (
         nm.last_name,
         nm.user_profile_created_at,
         nmws.week_start_date,
-        true as is_backfill
+        true as is_backfill -- Set to True by deault since new members automatically get a backfill
     from new_members nm
     cross join new_member_weeks_spine nmws
     where nmws.week_start_date >= DATE(DATE_TRUNC(nm.user_profile_created_at, WEEK(MONDAY)))
@@ -157,7 +161,7 @@ member_weeks as (
 
 -- Full Refresh Mode: Build complete historical spine for all members
 
--- Get all unique weeks from activity data
+-- Get all unique weeks from activity data (this will not create a monthly spine)
 all_weeks as (
     select distinct DATE(week_start_date) as week_start_date from {{ ref('int_weekly_live_classes_attended') }}
     union distinct
@@ -179,7 +183,7 @@ member_weeks as (
         m.last_name,
         m.user_profile_created_at,
         w.week_start_date,
-        false as is_backfill
+        false as is_backfill -- backfill is set to false by defualt if its a full-refresh
     from community_members m
     cross join all_weeks w
     where w.week_start_date >= DATE(DATE_TRUNC(m.user_profile_created_at, WEEK(MONDAY)))
@@ -204,18 +208,32 @@ combined_metrics as (
         COALESCE(comments_rcv.comments_received, 0) as comments_received,
         COALESCE(comments_made.comments_made, 0) as comments_made
     from member_weeks mw
+    
+    -- Get live classes attended 
     left join {{ ref('int_weekly_live_classes_attended') }} classes
         on mw.community_member_id = classes.community_member_id
         and mw.week_start_date = DATE(classes.week_start_date)
+    
+
+    -- Get lessons completed
     left join {{ ref('int_weekly_lessons_completed') }} lessons
         on mw.community_member_id = lessons.community_member_id
         and mw.week_start_date = DATE(lessons.week_start_date)
+    
+
+    -- Get likes recieved from posts and comments
     left join {{ ref('int_weekly_likes_received') }} likes
         on mw.community_member_id = likes.community_member_id
         and mw.week_start_date = DATE(likes.week_start_date)
+    
+
+    -- Get commnents received from post per community member
     left join {{ ref('int_weekly_comments_received') }} comments_rcv
         on mw.community_member_id = comments_rcv.community_member_id
         and mw.week_start_date = DATE(comments_rcv.week_start_date)
+   
+
+   -- Get weekly comments made on posts
     left join {{ ref('int_weekly_comments_made') }} comments_made
         on mw.community_member_id = comments_made.community_member_id
         and mw.week_start_date = DATE(comments_made.week_start_date)
@@ -235,6 +253,7 @@ final_output as (
         likes_received,
         comments_received,
         comments_made,
+        
         -- Flag for any activity this week
         case 
             when (classes_attended + lessons_completed + likes_received + 
