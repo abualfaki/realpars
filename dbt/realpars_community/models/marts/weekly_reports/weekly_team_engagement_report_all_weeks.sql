@@ -109,4 +109,5 @@ final_output AS (
         AND te.week_start_date = cw.week_start_date
 )
 
-SELECT * FROM final_output
+SELECT * 
+FROM final_output
