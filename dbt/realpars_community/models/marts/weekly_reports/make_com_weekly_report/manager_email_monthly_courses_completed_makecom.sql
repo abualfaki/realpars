@@ -14,9 +14,9 @@
     - courses_completed_table_html: complete HTML table with inline styles for Gmail
 */
 
-with latest_month as (
-    select
-        max(date_trunc(date(created_at), month)) as report_month_start_date
+with reporting_month as (
+    select 
+        max(date_trunc(date_sub(date(created_at), INTERVAL 1 MONTH), MONTH)) as report_month_start_date
     from {{ source('cc_stg_clean', 'clean_courses_completed_table') }}
     where created_at is not null
 ),
@@ -31,7 +31,7 @@ all_managers as (
     where manager_email is not null
 ),
 
--- Get manager-member relationships (only for course completion tracking)
+-- Get manager to team member relationships
 manager_business as (
     select distinct
         manager_email,
@@ -43,6 +43,7 @@ manager_business as (
       and member_community_id is not null
 ),
 
+-- Get course completions for each community member
 base_completions as (
     select
         safe_cast(initiator_community_id as int64) as member_community_id,
@@ -53,6 +54,7 @@ base_completions as (
       and created_at is not null
       and course_name is not null
 ),
+
 
 -- Keep only one completion per member/course/month
 deduplicated_member_course as (
@@ -67,15 +69,15 @@ deduplicated_member_course as (
         report_month_start_date
 ),
 
--- Get ALL managers (even those with no course completions)
+-- Get ALL managers for the report month
 all_managers_for_report as (
     select distinct
         am.manager_email,
         am.manager_full_name,
         am.business_name,
-        lm.report_month_start_date
+        rm.report_month_start_date
     from all_managers am
-    cross join latest_month lm
+    cross join reporting_month rm
 ),
 
 member_course_with_business as (
@@ -94,10 +96,10 @@ member_course_with_business as (
             end,
             coalesce(nullif(trim(br.member_last_name), ''), '')
         ) as member_full_name
-    from deduplicated_member_course d
-    inner join manager_business mb
+    from deduplicated_member_course d -- Community members who completed courses
+    inner join manager_business mb -- Map course completions of memebers to their business and manager
         on d.member_community_id = mb.member_community_id
-    inner join {{ ref('business_relationships') }} br
+    inner join {{ ref('business_relationships') }} br 
         on br.member_community_id = d.member_community_id
        and br.manager_email = mb.manager_email
        and br.business_name = mb.business_name
@@ -117,7 +119,7 @@ course_agg as (
             order by member_full_name
         ) as completed_by_names
     from member_course_with_business
-    where report_month_start_date = (select report_month_start_date from latest_month)
+    where report_month_start_date = (select report_month_start_date from reporting_month)
     group by
         manager_email,
         manager_full_name,
@@ -184,7 +186,7 @@ team_members_status as (
         ) as member_full_name,
         count(distinct mcc.course_name) as member_completion_count
     from manager_business mb
-    cross join latest_month lm
+    cross join reporting_month lm
     inner join {{ ref('business_relationships') }} br
         on br.member_community_id = mb.member_community_id
        and br.manager_email = mb.manager_email
@@ -260,4 +262,5 @@ left join team_summary_stats tss
     on tss.manager_email = am.manager_email
    and tss.business_name = am.business_name
    and tss.report_month_start_date = am.report_month_start_date
+where lower(rb.business_name) = 'ringnes'
 order by am.business_name, am.manager_email
