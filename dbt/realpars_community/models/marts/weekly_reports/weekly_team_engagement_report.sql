@@ -72,11 +72,11 @@ latest_week AS (
     -- Get the latest COMPLETED week from engagement data.
     -- Exclude the current (in-progress) week so reports always show the last full week.
     SELECT 
-        MAX(week_start_date) as week_start_date,
-        MAX(week_end_date) as week_end_date
+        DATE(MAX('2026-10-12')) as week_start_date,
+        DATE(MAX('2026-10-18')) as week_end_date
     FROM {{ ref('int_weekly_member_engagement_incremental') }}
-    WHERE week_start_date IS NOT NULL
-        AND week_start_date < DATE_TRUNC(CURRENT_DATE(), WEEK(MONDAY))
+   -- WHERE week_start_date IS NOT NULL
+        -- AND week_start_date < DATE_TRUNC(CURRENT_DATE(), WEEK(MONDAY))
 ),
 
 final_output AS (
