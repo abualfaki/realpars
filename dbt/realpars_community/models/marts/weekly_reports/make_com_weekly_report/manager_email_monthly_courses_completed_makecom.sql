@@ -262,5 +262,4 @@ left join team_summary_stats tss
     on tss.manager_email = am.manager_email
    and tss.business_name = am.business_name
    and tss.report_month_start_date = am.report_month_start_date
-where lower(rb.business_name) = 'ringnes'
 order by am.business_name, am.manager_email
